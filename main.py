@@ -18,7 +18,6 @@ for file in os.listdir(path):
         images.append(os.path.join(path, file))
 
 
-
 class LANSocketLabel(QLabel):
     def __init__(self):
         super().__init__()
@@ -117,6 +116,17 @@ class AnotherWindow(QWidget):
         super().__init__()
 
 
+class WarWindow(QWidget):
+    def __init__(self, title, message):
+        super().__init__()
+        self.setWindowTitle(title)
+        lay = QHBoxLayout()
+        label = QLabel()
+        label.setText(message)
+        lay.addWidget(label)
+        self.setLayout(lay)
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -138,25 +148,26 @@ class MainWindow(QMainWindow):
         self.subW.pushButton.clicked.connect(self.onclick)
 
     def enter(self):
-<<<<<<< HEAD
-        if (self.win.login.text() == '' or self.win.passwd.text() == '' or self.win.port.text() == ''):
+        if self.win.login.text() == '' or self.win.passwd.text() == '' or self.win.port.text() == '':
             QMessageBox.warning(self, 'Ошибка при попытке подключения',
                                 'Неудачная попытка подключения: не все поля заполнены!')  # ошибка входа
         else:
-            print('')  # заходим (здесь действие по нажатию кнопки войти)
-=======
-        # if (self.win.login.text() == '' or self.win.passwd.text() == '' or self.win.port.text() == ''):
-        #     QMessageBox.warning(self, 'Ошибка при попытке подключения',
-        #                         'Неудачная попытка подключения: не все поля заполнены!')  # ошибка
-        # else:
+            self.win.connStatus.setStyleSheet('color:green;text-align:center;')
+            self.win.connStatus.setText('Подключение...')
             read_thread = threading.Thread(target=self.connect)
             read_thread.start()
+            self.win.ok.setDisabled(True)
+            self.win.login.setDisabled(True)
+            self.win.passwd.setDisabled(True)
+            self.win.port.setDisabled(True)
+            self.win.ip.setDisabled(True)
+            self.win.setCursor(Qt.CursorShape.WaitCursor)
 
     def connect(self):
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
-            #ssh.connect(self.win.ip.text(), username=self.win.login.text(), password=self.win.passwd.text())
+            # ssh.connect(self.win.ip.text(), username=self.win.login.text(), password=self.win.passwd.text())
             ssh.connect('10.16.7.74', username='obi', password='ndszi3917')
             channel = ssh.invoke_shell()
             time.sleep(1)
@@ -177,15 +188,48 @@ class MainWindow(QMainWindow):
                     break
             output = channel.recv(65535)
             print(output.decode('utf-8'))
+        except TimeoutError:
+            self.win.connStatus.setStyleSheet('color:red;text-align:center;font-size:10px;')
+            self.win.connStatus.setText('Ошибка аутентификации: Истекло время подключения.')
+            self.win.ok.setDisabled(False)
+            self.win.login.setDisabled(False)
+            self.win.passwd.setDisabled(False)
+            self.win.port.setDisabled(False)
+            self.win.ip.setDisabled(False)
+            self.win.setCursor(Qt.CursorShape.ArrowCursor)
+
         except paramiko.AuthenticationException:
-            print("Ошибка аутентификации. Проверьте правильность имени пользователя и пароля.")
+            self.win.connStatus.setStyleSheet('color:red;text-align:center;font-size:10px;')
+            self.win.connStatus.setText('Ошибка аутентификации: Проверьте правильность имени пользователя и пароля.')
+            self.win.ok.setDisabled(False)
+            self.win.login.setDisabled(False)
+            self.win.passwd.setDisabled(False)
+            self.win.port.setDisabled(False)
+            self.win.ip.setDisabled(False)
+            self.win.setCursor(Qt.CursorShape.ArrowCursor)
+
         except paramiko.SSHException as sshException:
-            print("Ошибка SSH: ", sshException)
+            self.win.connStatus.setStyleSheet('color:red;text-align:center;font-size:10px;')
+            self.win.connStatus.setText('Ошибка SSH: ' + str(sshException))
+            self.win.ok.setDisabled(False)
+            self.win.login.setDisabled(False)
+            self.win.passwd.setDisabled(False)
+            self.win.port.setDisabled(False)
+            self.win.ip.setDisabled(False)
+            self.win.setCursor(Qt.CursorShape.ArrowCursor)
+
         except paramiko.ssh_exception.NoValidConnectionsError as e:
-            print("Ошибка подключения: ", e)
+            self.win.connStatus.setStyleSheet('color:red;text-align:center;font-size:10px;')
+            self.win.connStatus.setText('Ошибка подключения: ' + str(e))
+            self.win.ok.setDisabled(False)
+            self.win.login.setDisabled(False)
+            self.win.passwd.setDisabled(False)
+            self.win.port.setDisabled(False)
+            self.win.ip.setDisabled(False)
+            self.win.setCursor(Qt.CursorShape.ArrowCursor)
+
         finally:
             ssh.close()
->>>>>>> 4d07fc6feff0e2a8592d54433b8c017390e423c8
 
     def onclick(self):
         self.win = AnotherWindow()
@@ -208,59 +252,62 @@ window.setWindowIcon(QIcon('./src/appIcon.png'))
 window.setWindowTitle('Communicator')
 window.setMinimumSize(800, 600)
 
-for i in range(2):
-    for j in range(12):
-        parameters = []
-        soc = LANSocket()
-        soc.setId(socketId)
-        soc.setPos(i, j)
-        soc.setIp('255.255.255.255')
-        soc.setPort('2500')
-        soc.setWlan('255.255.255.255')
-        soc.setStatus(True, './src/lan_free.png')
-        soc.setSpeed('100 Mb/s')
-        lanSockets.append(soc)
 
-        parameters.append(str(soc.getId()))
-        parameters.append(soc.getIco())
-        parameters.append(soc.getIp())
-        parameters.append(soc.getPort())
-        parameters.append(soc.getWlan())
-        parameters.append(soc.getSpeed())
+for j in range(24):
+    parameters = []
+    soc = LANSocket()
+    soc.setId(socketId)
+    if (soc.getId() + 1) % 2 == 0:
+        soc.setPos(1, j-1)
+    else:
+        soc.setPos(0, j)
+    soc.setIp('255.255.255.255')
+    soc.setPort('2500')
+    soc.setWlan('255.255.255.255')
+    soc.setStatus(True, './src/lan_free.png')
+    soc.setSpeed('100 Mb/s')
+    lanSockets.append(soc)
 
-        # Заполнение превью комика
-        window.findChild(QGridLayout,
-                         'socketsPreview').addWidget(soc.getIco(), soc.getPosX(), soc.getPosY(), Qt.AlignCenter)
-        # Заполнение таблицы по вебморде
-        window.findChild(QTableWidget, 'lanSockets').insertRow(socketId)
-        for k in range(window.findChild(QTableWidget, 'lanSockets').columnCount()):
+    parameters.append(str(soc.getId()))
+    parameters.append(soc.getIco())
+    parameters.append(soc.getIp())
+    parameters.append(soc.getPort())
+    parameters.append(soc.getWlan())
+    parameters.append(soc.getSpeed())
 
-            if k == 1:
-                itm = QTableWidgetItem()
-                itm.setIcon(QIcon(parameters[k].pixmap()))
-                itm.setTextAlignment(Qt.AlignCenter)
-                window.findChild(QTableWidget, 'lanSockets').setItem(socketId, k, itm)
-            else:
-                itm = QTableWidgetItem()
-                itm.setText(parameters[k])
-                itm.setTextAlignment(Qt.AlignCenter)
-                window.findChild(QTableWidget, 'lanSockets').setItem(socketId, k, QTableWidgetItem(parameters[k]))
+    # Заполнение превью комика
+    window.findChild(QGridLayout,
+                     'socketsPreview').addWidget(soc.getIco(), soc.getPosX(), soc.getPosY(), Qt.AlignCenter)
+    # Заполнение таблицы по вебморде
+    window.findChild(QTableWidget, 'lanSockets').insertRow(socketId)
+    for k in range(window.findChild(QTableWidget, 'lanSockets').columnCount()):
 
-        socketId += 1
+        if k == 1:
+            itm = QTableWidgetItem()
+            itm.setIcon(QIcon(parameters[k].pixmap()))
+            itm.setTextAlignment(Qt.AlignCenter)
+            window.findChild(QTableWidget, 'lanSockets').setItem(socketId, k, itm)
+        else:
+            itm = QTableWidgetItem()
+            itm.setText(parameters[k])
+            itm.setTextAlignment(Qt.AlignCenter)
+            window.findChild(QTableWidget, 'lanSockets').setItem(socketId, k, QTableWidgetItem(parameters[k]))
 
-
-        # Поиск сокета в превью по нажатию на строку таблицы
-        def selectSocket():
-            for lab in lanSockets:
-                lab.getIco().setStyleSheet('border:none;:hover {border:3px solid #FF17365D;border-radius:5px;};')
-            num = window.findChild(QTableWidget, 'lanSockets').currentRow()
-            for lab in lanSockets:
-                if lab.getIco().getId() == num:
-                    lab.getIco().setStyleSheet('border:3px solid #FF17365D;border-radius:5px;padding:0;margin:0;')
-                    prevSocket = num
+    socketId += 1
 
 
-        window.findChild(QTableWidget, 'lanSockets').itemClicked.connect(selectSocket)
+    # Поиск сокета в превью по нажатию на строку таблицы
+    def selectSocket():
+        for lab in lanSockets:
+            lab.getIco().setStyleSheet('border:none;:hover {border:3px solid #FF17365D;border-radius:5px;};')
+        num = window.findChild(QTableWidget, 'lanSockets').currentRow()
+        for lab in lanSockets:
+            if lab.getIco().getId() == num:
+                lab.getIco().setStyleSheet('border:3px solid #FF17365D;border-radius:5px;padding:0;margin:0;')
+                prevSocket = num
+
+
+    window.findChild(QTableWidget, 'lanSockets').itemClicked.connect(selectSocket)
 
 window.show()
 
