@@ -1,8 +1,12 @@
 import os, sys
+import time
+
+import paramiko
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5 import QtCore, uic
+import threading
 
 socketId = 0
 lanSockets = []
@@ -12,6 +16,7 @@ images = []
 for file in os.listdir(path):
     if os.path.isfile(os.path.join(path, file)):
         images.append(os.path.join(path, file))
+
 
 
 class LANSocketLabel(QLabel):
@@ -118,11 +123,11 @@ class MainWindow(QMainWindow):
         self.setMouseTracking(True)
 
         w = QWidget()
-        uic.loadUi('../project_comm/mainForm_v2.ui', w)
+        uic.loadUi('./mainForm_v2.ui', w)
         self.setCentralWidget(w)
 
         self.subW = QWidget()
-        uic.loadUi('../project_comm/form.ui', self.subW)
+        uic.loadUi('./form.ui', self.subW)
         self.subW.setWindowModality(QtCore.Qt.WindowModality.ApplicationModal)
         self.subW.show()
 
@@ -133,15 +138,58 @@ class MainWindow(QMainWindow):
         self.subW.pushButton.clicked.connect(self.onclick)
 
     def enter(self):
+<<<<<<< HEAD
         if (self.win.login.text() == '' or self.win.passwd.text() == '' or self.win.port.text() == ''):
             QMessageBox.warning(self, 'Ошибка при попытке подключения',
                                 'Неудачная попытка подключения: не все поля заполнены!')  # ошибка входа
         else:
             print('')  # заходим (здесь действие по нажатию кнопки войти)
+=======
+        # if (self.win.login.text() == '' or self.win.passwd.text() == '' or self.win.port.text() == ''):
+        #     QMessageBox.warning(self, 'Ошибка при попытке подключения',
+        #                         'Неудачная попытка подключения: не все поля заполнены!')  # ошибка
+        # else:
+            read_thread = threading.Thread(target=self.connect)
+            read_thread.start()
+
+    def connect(self):
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        try:
+            #ssh.connect(self.win.ip.text(), username=self.win.login.text(), password=self.win.passwd.text())
+            ssh.connect('10.16.7.74', username='obi', password='ndszi3917')
+            channel = ssh.invoke_shell()
+            time.sleep(1)
+            channel.send('enable\n')
+            time.sleep(1)
+            output = channel.recv(65535)
+            channel.send('screen-length 0 temporary\n')
+            print(output.decode('utf-8'))
+            channel.send('show running-config\n')
+            for kaka in range(10):
+                time.sleep(1)
+                channel.send(' ')
+            while True:
+                if channel.recv_ready():
+                    output = channel.recv(65535).decode('utf-8')
+                    print(output)
+                else:
+                    break
+            output = channel.recv(65535)
+            print(output.decode('utf-8'))
+        except paramiko.AuthenticationException:
+            print("Ошибка аутентификации. Проверьте правильность имени пользователя и пароля.")
+        except paramiko.SSHException as sshException:
+            print("Ошибка SSH: ", sshException)
+        except paramiko.ssh_exception.NoValidConnectionsError as e:
+            print("Ошибка подключения: ", e)
+        finally:
+            ssh.close()
+>>>>>>> 4d07fc6feff0e2a8592d54433b8c017390e423c8
 
     def onclick(self):
         self.win = AnotherWindow()
-        uic.loadUi('../project_comm/loginForm.ui', self.win)
+        uic.loadUi('./loginForm.ui', self.win)
         self.win.setWindowModality(QtCore.Qt.WindowModality.ApplicationModal)
         self.win.ok.clicked.connect(self.enter)
         self.win.passwd.setEchoMode(QLineEdit.Password)
@@ -156,7 +204,7 @@ class MainWindow(QMainWindow):
 app = QApplication(sys.argv)
 
 window = MainWindow()
-window.setWindowIcon(QIcon('../desktop/src/appIcon.png'))
+window.setWindowIcon(QIcon('./src/appIcon.png'))
 window.setWindowTitle('Communicator')
 window.setMinimumSize(800, 600)
 
@@ -200,6 +248,7 @@ for i in range(2):
 
         socketId += 1
 
+
         # Поиск сокета в превью по нажатию на строку таблицы
         def selectSocket():
             for lab in lanSockets:
@@ -209,6 +258,7 @@ for i in range(2):
                 if lab.getIco().getId() == num:
                     lab.getIco().setStyleSheet('border:3px solid #FF17365D;border-radius:5px;padding:0;margin:0;')
                     prevSocket = num
+
 
         window.findChild(QTableWidget, 'lanSockets').itemClicked.connect(selectSocket)
 
