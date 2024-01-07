@@ -135,9 +135,9 @@ class MainWindow(QMainWindow):
     def enter(self):
         if (self.win.login.text() == '' or self.win.passwd.text() == '' or self.win.port.text() == ''):
             QMessageBox.warning(self, 'Ошибка при попытке подключения',
-                                'Неудачная попытка подключения: не все поля заполнены!')  # ошибка
+                                'Неудачная попытка подключения: не все поля заполнены!')  # ошибка входа
         else:
-            print('')  # заходим
+            print('')  # заходим (здесь действие по нажатию кнопки войти)
 
     def onclick(self):
         self.win = AnotherWindow()
