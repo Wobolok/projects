@@ -6,8 +6,8 @@ data = file.readlines()
 for line in data:
     if line.startswith('port'):
         if len(line.split()) > 5:
-            print(line.split())
-            ports.append(line.split())
+            print(line.split(maxsplit=5))
+            ports.append(line.split(maxsplit=5))
 print(ports)
 # Works well---------------------------------
 # file.readline()

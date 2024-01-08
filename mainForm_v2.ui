@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>824</width>
-    <height>486</height>
+    <width>1030</width>
+    <height>345</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -224,12 +224,7 @@ QTableWidget {
        </column>
        <column>
         <property name="text">
-         <string>Статус</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>IP</string>
+         <string>Коммутатор</string>
         </property>
        </column>
        <column>
@@ -239,12 +234,27 @@ QTableWidget {
        </column>
        <column>
         <property name="text">
-         <string>WLAN</string>
+         <string>Статус</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>VLAN</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Дуплекс</string>
         </property>
        </column>
        <column>
         <property name="text">
          <string>Скорость</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Тип</string>
         </property>
        </column>
       </widget>

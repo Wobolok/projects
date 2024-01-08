@@ -12,6 +12,7 @@ socketId = 0
 lanSockets = []
 path = './commLogos'
 images = []
+ports = []
 
 for file in os.listdir(path):
     if os.path.isfile(os.path.join(path, file)):
@@ -43,14 +44,16 @@ class LANSocket():
         self.id = None
         self.posX = None
         self.posY = None
+        self.name = None
+        self.commName = None
         self.wlan = None
-        self.ip = None
-        self.port = None
         self.status = None
         self.imgPath = None
         self.pix = None
         self.ico = None
         self.speed = None
+        self.type = None
+        self.duplex = None
 
     def setId(self, id):
         self.id = id
@@ -59,14 +62,14 @@ class LANSocket():
         self.posX = posX
         self.posY = posY
 
+    def setName(self, name):
+        self.name = name
+
+    def setCommName(self, commName):
+        self.commName = commName
+
     def setWlan(self, wlan):
         self.wlan = wlan
-
-    def setIp(self, ip):
-        self.ip = ip
-
-    def setPort(self, port):
-        self.port = port
 
     def setStatus(self, status, imgPath):
         self.status = status
@@ -80,6 +83,12 @@ class LANSocket():
     def setSpeed(self, speed):
         self.speed = speed
 
+    def setType(self, type):
+        self.type = type
+
+    def setDuplex(self, duplex):
+        self.duplex = duplex
+
     def getId(self):
         return self.id
 
@@ -92,11 +101,11 @@ class LANSocket():
     def getWlan(self):
         return self.wlan
 
-    def getIp(self):
-        return self.ip
+    def getName(self):
+        return self.name
 
-    def getPort(self):
-        return self.port
+    def getCommName(self):
+        return self.commName
 
     def getStatus(self):
         return self.status
@@ -109,6 +118,12 @@ class LANSocket():
 
     def getSpeed(self):
         return self.speed
+
+    def getType(self):
+        return self.type
+
+    def getDuplex(self):
+        return self.duplex
 
 
 class AnotherWindow(QWidget):
@@ -146,6 +161,17 @@ class MainWindow(QMainWindow):
             self.subW.findChildren(QPushButton)[child].setIconSize(QtCore.QSize(200, 100))
 
         self.subW.pushButton.clicked.connect(self.onclick)
+
+    def readData(self, data):
+        ports.clear()
+        lanSockets.clear()
+        socketId = 0
+        file = open('./text_test.txt', 'r')
+        data = file.readlines()
+        for line in data:
+            if line.startswith('port'):
+                if len(line.split()) > 5:
+                    ports.append(line.split(maxsplit=5))
 
     def enter(self):
         if self.win.login.text() == '' or self.win.passwd.text() == '' or self.win.port.text() == '':
@@ -188,6 +214,7 @@ class MainWindow(QMainWindow):
                     break
             output = channel.recv(65535)
             print(output.decode('utf-8'))
+
         except TimeoutError:
             self.win.connStatus.setStyleSheet('color:red;text-align:center;font-size:10px;')
             self.win.connStatus.setText('Ошибка аутентификации: Истекло время подключения.')
@@ -250,50 +277,55 @@ app = QApplication(sys.argv)
 window = MainWindow()
 window.setWindowIcon(QIcon('./src/appIcon.png'))
 window.setWindowTitle('Communicator')
-window.setMinimumSize(800, 600)
+window.setMinimumSize(1000, 600)
 
+window.readData('')
 
-for j in range(24):
-    parameters = []
-    soc = LANSocket()
-    soc.setId(socketId)
-    if (soc.getId() + 1) % 2 == 0:
-        soc.setPos(1, j-1)
-    else:
-        soc.setPos(0, j)
-    soc.setIp('255.255.255.255')
-    soc.setPort('2500')
-    soc.setWlan('255.255.255.255')
-    soc.setStatus(True, './src/lan_free.png')
-    soc.setSpeed('100 Mb/s')
-    lanSockets.append(soc)
-
-    parameters.append(str(soc.getId()))
-    parameters.append(soc.getIco())
-    parameters.append(soc.getIp())
-    parameters.append(soc.getPort())
-    parameters.append(soc.getWlan())
-    parameters.append(soc.getSpeed())
-
-    # Заполнение превью комика
-    window.findChild(QGridLayout,
-                     'socketsPreview').addWidget(soc.getIco(), soc.getPosX(), soc.getPosY(), Qt.AlignCenter)
-    # Заполнение таблицы по вебморде
-    window.findChild(QTableWidget, 'lanSockets').insertRow(socketId)
-    for k in range(window.findChild(QTableWidget, 'lanSockets').columnCount()):
-
-        if k == 1:
-            itm = QTableWidgetItem()
-            itm.setIcon(QIcon(parameters[k].pixmap()))
-            itm.setTextAlignment(Qt.AlignCenter)
-            window.findChild(QTableWidget, 'lanSockets').setItem(socketId, k, itm)
+if len(ports) != 0:
+    for port in ports:
+        j = ports.index(port)
+        parameters = []
+        soc = LANSocket()
+        soc.setId(socketId)
+        if (soc.getId() + 1) % 2 == 0:
+            soc.setPos(1, j-1)
         else:
+            soc.setPos(0, j)
+        soc.setWlan(port[2])
+        soc.setName(port[0])
+        soc.setCommName(port[0][4])
+        if port[1] == 'notconnect':
+            soc.setStatus(port[1], './src/lan_free.png')
+        elif port[1] == 'connected' and port[2] == 'trunk':
+            soc.setStatus(port[1], './src/lan_root.png')
+        elif port[1] == 'connected' and port[2] != 'trunk':
+            soc.setStatus(port[1], './src/lan_used.png')
+        soc.setSpeed(port[4])
+        soc.setDuplex(port[3])
+        soc.setType(port[5])
+        lanSockets.append(soc)
+
+        parameters.append(str(soc.getId()))
+        parameters.append(soc.getCommName())
+        parameters.append(soc.getName())
+        parameters.append(soc.getStatus())
+        parameters.append(soc.getWlan())
+        parameters.append(soc.getDuplex())
+        parameters.append(soc.getSpeed())
+        parameters.append(soc.getType())
+
+        # Заполнение превью комика
+        window.findChild(QGridLayout,
+                         'socketsPreview').addWidget(soc.getIco(), soc.getPosX(), soc.getPosY(), Qt.AlignCenter)
+        # Заполнение таблицы по вебморде
+        window.findChild(QTableWidget, 'lanSockets').insertRow(socketId)
+        for k in range(window.findChild(QTableWidget, 'lanSockets').columnCount()):
             itm = QTableWidgetItem()
             itm.setText(parameters[k])
             itm.setTextAlignment(Qt.AlignCenter)
             window.findChild(QTableWidget, 'lanSockets').setItem(socketId, k, QTableWidgetItem(parameters[k]))
 
-    socketId += 1
+        socketId += 1
 
 
     # Поиск сокета в превью по нажатию на строку таблицы
