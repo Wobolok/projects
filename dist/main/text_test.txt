@@ -25,24 +25,6 @@ port3.0.23                    connected         2001 a-full   a-100 1000BASE-T
 port3.0.24                    notconnect       trunk auto      auto 1000BASE-T
 port3.0.25                    notconnect           1 auto      auto not present
 port3.0.26                    notconnect           1 auto      auto not present
-port4.0.1                     notconnect           1 auto      auto not present
-port4.0.2                     notconnect           1 auto      auto 1000BASE-SX
-port4.0.3                     notconnect           1 auto      auto 1000BASE-SX
-port4.0.4                     notconnect           1 auto      auto not present
-port4.0.5                     notconnect           1 auto      auto not present
-port4.0.6                     notconnect           1 auto      auto not present
-port4.0.7                     notconnect           1 auto      auto not present
-port4.0.8                     notconnect           1 auto      auto not present
-port5.0.1                     notconnect           1 auto      auto not present
-port5.0.2                     notconnect           1 auto      auto 1000BASE-SX
-port5.0.3                     notconnect           1 auto      auto 1000BASE-SX
-port5.0.4                     notconnect           1 auto      auto not present
-port5.0.5                     notconnect           1 auto      auto not present
-port5.0.6                     notconnect           1 auto      auto not present
-port5.0.7                     notconnect           1 auto      auto not present
-port5.0.8                     notconnect           1 auto      auto not present
-port5.0.9                     notconnect           1 auto      auto not present
-port5.0.10                     notconnect           1 auto      auto not present
 port3.1.1                     notconnect           1 auto      auto
 port3.1.2                     notconnect           1 auto      auto
 14K-220p-74#

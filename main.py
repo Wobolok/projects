@@ -5,9 +5,12 @@ import paramiko
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from PyQt5.QtXml import QDomDocument, QDomElement, QDomNode
+from PyQt5.QtSvg import QSvgRenderer
 from PyQt5 import QtCore, uic
 import threading
 
+prevComm = None
 socketId = 0
 lanSockets = []
 path = './commLogos'
@@ -20,6 +23,8 @@ for file in os.listdir(path):
 
 
 class LANSocketLabel(QLabel):
+    clicked = pyqtSignal(int)
+
     def __init__(self):
         super().__init__()
         self.id = None
@@ -29,6 +34,7 @@ class LANSocketLabel(QLabel):
     def mousePressEvent(self, ev):
         if ev.button() == Qt.LeftButton:
             selectedSocket = self.getId()
+            self.clicked.emit(selectedSocket)
             print(selectedSocket)
 
     def setId(self, socId):
@@ -73,7 +79,26 @@ class LANSocket():
 
     def setStatus(self, status, imgPath):
         self.status = status
-        self.pix = QPixmap(QPixmap(imgPath)).scaled(50, 50, Qt.KeepAspectRatio)
+        # xml_reader = QDomDocument()
+        # with open(imgPath, 'r') as file:
+        #     xml_reader.setContent(file.read())
+        #
+        # # Replace text within the SVG
+        # node = xml_reader.firstChild()
+        # while not node.isNull():
+        #     if node.isElement():
+        #         element = node.toElement()
+        #         if element.tagName() == 'text' and element.text() != str(self.id):
+        #             element.setNodeValue(str(self.id))
+        #     node = node.nextSibling()
+        #
+        # renderer = QSvgRenderer(xml_reader.toByteArray())
+        # image = QImage(48, 48, QImage.Format_ARGB32)
+        # image.fill(0)
+        # painter = QPainter(image)
+        # renderer.render(painter)
+        # painter.end()
+        self.pix = QPixmap(QPixmap(imgPath).scaled(50, 50, Qt.KeepAspectRatio))
         self.ico = LANSocketLabel()
         self.ico.setPixmap(self.pix)
         self.ico.setId(self.getId())
@@ -161,6 +186,9 @@ class MainWindow(QMainWindow):
             self.subW.findChildren(QPushButton)[child].setIconSize(QtCore.QSize(200, 100))
 
         self.subW.pushButton.clicked.connect(self.onclick)
+
+    def selectRow(self):
+        self.findChild(QTableWidget, 'lanSockets').selectRow(selectedSocket)
 
     def readData(self, data):
         ports.clear()
@@ -282,7 +310,24 @@ window.setMinimumSize(1000, 600)
 window.readData('')
 
 if len(ports) != 0:
+    commLabel = QLabel()
+    commLabel.setText('Коммутатор' + ports[0][0][4])
+    window.findChild(QGroupBox, 'groupBox').layout().addWidget(commLabel)
+
+    fillingComm = window.findChild(QGridLayout, 'socketsPreview')
+
     for port in ports:
+        currComm = port[0][4]
+
+        if prevComm is not None and prevComm != currComm:
+            comm = QGridLayout()
+            comm.setObjectName('socketsPreview' + currComm)
+            nextCommLabel = QLabel()
+            nextCommLabel.setText('Коммутатор' + currComm)
+            window.findChild(QGroupBox, 'groupBox').layout().addWidget(nextCommLabel)
+            window.findChild(QGroupBox, 'groupBox').layout().addLayout(comm)
+            fillingComm = comm
+
         j = ports.index(port)
         parameters = []
         soc = LANSocket()
@@ -292,7 +337,7 @@ if len(ports) != 0:
         else:
             soc.setPos(0, j)
         soc.setWlan(port[2])
-        soc.setName(port[0])
+        soc.setName(port[0].split('.')[2])
         soc.setCommName(port[0][4])
         if port[1] == 'notconnect':
             soc.setStatus(port[1], './src/lan_free.png')
@@ -315,8 +360,7 @@ if len(ports) != 0:
         parameters.append(soc.getType())
 
         # Заполнение превью комика
-        window.findChild(QGridLayout,
-                         'socketsPreview').addWidget(soc.getIco(), soc.getPosX(), soc.getPosY(), Qt.AlignCenter)
+        fillingComm.addWidget(soc.getIco(), soc.getPosX(), soc.getPosY(), Qt.AlignCenter)
         # Заполнение таблицы по вебморде
         window.findChild(QTableWidget, 'lanSockets').insertRow(socketId)
         for k in range(window.findChild(QTableWidget, 'lanSockets').columnCount()):
@@ -326,20 +370,33 @@ if len(ports) != 0:
             window.findChild(QTableWidget, 'lanSockets').setItem(socketId, k, QTableWidgetItem(parameters[k]))
 
         socketId += 1
+        prevComm = currComm
 
 
     # Поиск сокета в превью по нажатию на строку таблицы
     def selectSocket():
         for lab in lanSockets:
             lab.getIco().setStyleSheet('border:none;:hover {border:3px solid #FF17365D;border-radius:5px;};')
-        num = window.findChild(QTableWidget, 'lanSockets').currentRow()
+
+        commName = window.findChild(QTableWidget,'lanSockets').item(window.findChild(QTableWidget, 'lanSockets').currentRow(), 1).text()
+        name = window.findChild(QTableWidget,'lanSockets').item(window.findChild(QTableWidget, 'lanSockets').currentRow(), 2).text()
         for lab in lanSockets:
-            if lab.getIco().getId() == num:
+            if lab.getName() == name and lab.getCommName() == commName:
+                print('clicked')
                 lab.getIco().setStyleSheet('border:3px solid #FF17365D;border-radius:5px;padding:0;margin:0;')
-                prevSocket = num
+
+    def selectRow(row):
+        window.findChild(QTableWidget, 'lanSockets').selectRow(row)
+        for soc in window.findChildren(LANSocketLabel):
+            if soc.getId() != row:
+                soc.setStyleSheet('border:none; :hover {border:3px solid #FF17365D;border-radius:5px;};')
+            else:
+                soc.setStyleSheet('border:3px solid #FF17365D;border-radius:5px;padding:0;margin:0;')
 
 
     window.findChild(QTableWidget, 'lanSockets').itemClicked.connect(selectSocket)
+    for soc in window.findChildren(LANSocketLabel):
+        soc.clicked.connect(selectRow)
 
 window.show()
 
