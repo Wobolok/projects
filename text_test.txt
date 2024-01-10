@@ -33,6 +33,24 @@ port4.0.5                     notconnect           1 auto      auto not present
 port4.0.6                     notconnect           1 auto      auto not present
 port4.0.7                     notconnect           1 auto      auto not present
 port4.0.8                     notconnect           1 auto      auto not present
+port4.0.9                     notconnect           1 auto      auto not present
+port4.0.10                     notconnect           1 auto      auto 1000BASE-SX
+port4.0.11                     notconnect           1 auto      auto 1000BASE-SX
+port4.0.12                     notconnect           1 auto      auto not present
+port4.0.13                     notconnect           1 auto      auto not present
+port4.0.14                     notconnect           1 auto      auto not present
+port4.0.15                     notconnect           1 auto      auto not present
+port4.0.16                     notconnect           1 auto      auto not present
+port4.0.17                     notconnect           1 auto      auto 1000BASE-SX
+port4.0.18                     notconnect           1 auto      auto 1000BASE-SX
+port4.0.19                     notconnect           1 auto      auto not present
+port4.0.20                     notconnect           1 auto      auto not present
+port4.0.21                     notconnect           1 auto      auto not present
+port4.0.22                     notconnect           1 auto      auto not present
+port4.0.23                     notconnect           1 auto      auto not present
+port4.0.24                     notconnect           1 auto      auto not present
+port4.0.25                     notconnect           1 auto      auto not present
+port4.0.26                     notconnect           1 auto      auto not present
 port5.0.1                     notconnect           1 auto      auto not present
 port5.0.2                     notconnect           1 auto      auto 1000BASE-SX
 port5.0.3                     notconnect           1 auto      auto 1000BASE-SX
@@ -43,6 +61,22 @@ port5.0.7                     notconnect           1 auto      auto not present
 port5.0.8                     notconnect           1 auto      auto not present
 port5.0.9                     notconnect           1 auto      auto not present
 port5.0.10                     notconnect           1 auto      auto not present
+port5.0.11                     notconnect           1 auto      auto not present
+port5.0.12                     notconnect           1 auto      auto 1000BASE-SX
+port5.0.13                     notconnect           1 auto      auto 1000BASE-SX
+port5.0.14                     notconnect           1 auto      auto not present
+port5.0.15                     notconnect           1 auto      auto not present
+port5.0.16                     notconnect           1 auto      auto not present
+port5.0.17                     notconnect           1 auto      auto not present
+port5.0.18                     notconnect           1 auto      auto not present
+port5.0.19                     notconnect           1 auto      auto not present
+port5.0.20                     notconnect           1 auto      auto not present
+port5.0.21                     notconnect           1 auto      auto not present
+port5.0.22                     notconnect           1 auto      auto not present
+port5.0.23                     notconnect           1 auto      auto not present
+port5.0.24                     notconnect           1 auto      auto not present
+port5.0.25                     notconnect           1 auto      auto not present
+port5.0.26                     notconnect           1 auto      auto not present
 port3.1.1                     notconnect           1 auto      auto
 port3.1.2                     notconnect           1 auto      auto
 14K-220p-74#

@@ -5,8 +5,8 @@ import paramiko
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from PyQt5.QtXml import QDomDocument, QDomElement, QDomNode
-from PyQt5.QtSvg import QSvgRenderer
+from PyQt5.QtXml import QDomDocument, QDomElement, QDomNode, QDomNodeList
+from PyQt5.QtSvg import QSvgRenderer, QSvgWidget
 from PyQt5 import QtCore, uic
 import threading
 
@@ -22,7 +22,7 @@ for file in os.listdir(path):
         images.append(os.path.join(path, file))
 
 
-class LANSocketLabel(QLabel):
+class LANSocketLabel(QSvgWidget):
     clicked = pyqtSignal(int)
 
     def __init__(self):
@@ -30,6 +30,7 @@ class LANSocketLabel(QLabel):
         self.id = None
         self.setMouseTracking(True)
         self.setCursor(Qt.PointingHandCursor)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
 
     def mousePressEvent(self, ev):
         if ev.button() == Qt.LeftButton:
@@ -79,30 +80,27 @@ class LANSocket():
 
     def setStatus(self, status, imgPath):
         self.status = status
-        # xml_reader = QDomDocument()
-        # with open(imgPath, 'r') as file:
-        #     xml_reader.setContent(file.read())
-        #
-        # # Replace text within the SVG
-        # node = xml_reader.firstChild()
-        # while not node.isNull():
-        #     if node.isElement():
-        #         element = node.toElement()
-        #         if element.tagName() == 'text' and element.text() != str(self.id):
-        #             element.setNodeValue(str(self.id))
-        #     node = node.nextSibling()
-        #
-        # renderer = QSvgRenderer(xml_reader.toByteArray())
-        # image = QImage(48, 48, QImage.Format_ARGB32)
-        # image.fill(0)
-        # painter = QPainter(image)
-        # renderer.render(painter)
-        # painter.end()
-        self.pix = QPixmap(QPixmap(imgPath).scaled(50, 50, Qt.KeepAspectRatio))
+
+        svg = QFile(imgPath)
         self.ico = LANSocketLabel()
-        self.ico.setPixmap(self.pix)
+        svgDoc = QDomDocument()
+        svgDoc.setContent(svg)
+        elemText = svgDoc.documentElement().firstChildElement()
+        text = elemText.elementsByTagName('text')
+        if text.size() and text.at(0).isElement():
+            elem = text.at(0).toElement()
+            elem.childNodes().at(0).setNodeValue(self.name)
+        # elemText.firstChild().toText().setData(self.name)
+        svg.close()
+        self.ico.load(svgDoc.toByteArray())
         self.ico.setId(self.getId())
-        self.ico.setOpenExternalLinks(True)
+        self.ico.setFixedSize(50, 50)
+
+        # self.pix = QPixmap(QPixmap(imgPath).scaled(50, 50, Qt.KeepAspectRatio))
+        # self.ico = LANSocketLabel()
+        # self.ico.setPixmap(self.pix)
+        # self.ico.setId(self.getId())
+        # self.ico.setOpenExternalLinks(True)
         self.imgPath = imgPath
 
     def setSpeed(self, speed):
@@ -305,16 +303,13 @@ app = QApplication(sys.argv)
 window = MainWindow()
 window.setWindowIcon(QIcon('./src/appIcon.png'))
 window.setWindowTitle('Communicator')
-window.setMinimumSize(1000, 600)
+window.setMinimumSize(1200, 900)
 
 window.readData('')
 
 if len(ports) != 0:
-    commLabel = QLabel()
-    commLabel.setText('Коммутатор' + ports[0][0][4])
-    window.findChild(QGroupBox, 'groupBox').layout().addWidget(commLabel)
-
     fillingComm = window.findChild(QGridLayout, 'socketsPreview')
+    window.findChild(QGroupBox, 'groupBox_2').setTitle('Коммутатор ' + ports[0][0][4])
 
     for port in ports:
         currComm = port[0][4]
@@ -322,35 +317,42 @@ if len(ports) != 0:
         if prevComm is not None and prevComm != currComm:
             comm = QGridLayout()
             comm.setObjectName('socketsPreview' + currComm)
-            nextCommLabel = QLabel()
-            nextCommLabel.setText('Коммутатор' + currComm)
-            window.findChild(QGroupBox, 'groupBox').layout().addWidget(nextCommLabel)
-            window.findChild(QGroupBox, 'groupBox').layout().addLayout(comm)
+            comm.setHorizontalSpacing(0)
+            comm.setVerticalSpacing(0)
+            gb = QGroupBox()
+            gb.setLayout(comm)
+            gb.setTitle('Коммутатор ' + currComm)
+            gb.setStyleSheet('QWidget {background-color:#dfdfdfff;} QGroupBox:title {subcontrol-origin: '
+                             'margin;subcontrol-position: top'
+                             'center;border-top-left-radius:'
+                             '15px;border-top-right-radius: 15px;padding: 5px 50px;background-color: #FF17365D;color: '
+                             'rgb(255, 255, 255);};')
+            window.findChild(QGroupBox, 'groupBox').layout().addWidget(gb)
             fillingComm = comm
 
         j = ports.index(port)
         parameters = []
         soc = LANSocket()
         soc.setId(socketId)
-        if (soc.getId() + 1) % 2 == 0:
-            soc.setPos(1, j-1)
-        else:
-            soc.setPos(0, j)
         soc.setWlan(port[2])
         soc.setName(port[0].split('.')[2])
+        if (int(soc.getName())) % 2 == 0:
+            soc.setPos(1, int(soc.getName()) - fillingComm.columnCount()+1)
+        else:
+            soc.setPos(0, int(soc.getName()) - fillingComm.columnCount()+1)
         soc.setCommName(port[0][4])
         if port[1] == 'notconnect':
-            soc.setStatus(port[1], './src/lan_free.png')
+            soc.setStatus(port[1], './src/socket_free.svg')
         elif port[1] == 'connected' and port[2] == 'trunk':
-            soc.setStatus(port[1], './src/lan_root.png')
+            soc.setStatus(port[1], './src/socket_trunk.svg')
         elif port[1] == 'connected' and port[2] != 'trunk':
-            soc.setStatus(port[1], './src/lan_used.png')
+            soc.setStatus(port[1], './src/socket_used.svg')
         soc.setSpeed(port[4])
         soc.setDuplex(port[3])
         soc.setType(port[5])
         lanSockets.append(soc)
 
-        parameters.append(str(soc.getId()))
+        # parameters.append(str(soc.getId()))
         parameters.append(soc.getCommName())
         parameters.append(soc.getName())
         parameters.append(soc.getStatus())
@@ -365,9 +367,9 @@ if len(ports) != 0:
         window.findChild(QTableWidget, 'lanSockets').insertRow(socketId)
         for k in range(window.findChild(QTableWidget, 'lanSockets').columnCount()):
             itm = QTableWidgetItem()
+            itm.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             itm.setText(parameters[k])
-            itm.setTextAlignment(Qt.AlignCenter)
-            window.findChild(QTableWidget, 'lanSockets').setItem(socketId, k, QTableWidgetItem(parameters[k]))
+            window.findChild(QTableWidget, 'lanSockets').setItem(socketId, k, itm)
 
         socketId += 1
         prevComm = currComm
@@ -378,8 +380,8 @@ if len(ports) != 0:
         for lab in lanSockets:
             lab.getIco().setStyleSheet('border:none;:hover {border:3px solid #FF17365D;border-radius:5px;};')
 
-        commName = window.findChild(QTableWidget,'lanSockets').item(window.findChild(QTableWidget, 'lanSockets').currentRow(), 1).text()
-        name = window.findChild(QTableWidget,'lanSockets').item(window.findChild(QTableWidget, 'lanSockets').currentRow(), 2).text()
+        commName = window.findChild(QTableWidget, 'lanSockets').item(window.findChild(QTableWidget, 'lanSockets').currentRow(), 0).text()
+        name = window.findChild(QTableWidget, 'lanSockets').item(window.findChild(QTableWidget, 'lanSockets').currentRow(), 1).text()
         for lab in lanSockets:
             if lab.getName() == name and lab.getCommName() == commName:
                 print('clicked')
@@ -393,10 +395,23 @@ if len(ports) != 0:
             else:
                 soc.setStyleSheet('border:3px solid #FF17365D;border-radius:5px;padding:0;margin:0;')
 
+    def showMenu():
+        menu = QMenu()
+        menu.setStyleSheet('border-radius:10px;border:3px solid #FF17365D;')
+        editVlan = QAction(QIcon(QPixmap('./src/changeVlan.png')), 'Изменить VLAN')
+        editSpeed = QAction(QIcon(QPixmap('./src/changeSpeed.png')), 'Изменить режим скорости')
+        setTrunk = QAction(QIcon(QPixmap('./src/changeMode.png')), 'Изменить на trunk')
+        setAccess = QAction(QIcon(QPixmap('./src/changeSpeed.png')), 'Изменить на access')
+        menu.addAction(editVlan)
+        menu.addAction(editSpeed)
+        menu.addAction(setTrunk)
+        menu.exec_(QCursor.pos())
+
 
     window.findChild(QTableWidget, 'lanSockets').itemClicked.connect(selectSocket)
     for soc in window.findChildren(LANSocketLabel):
         soc.clicked.connect(selectRow)
+        soc.customContextMenuRequested.connect(showMenu)
 
 window.show()
 
