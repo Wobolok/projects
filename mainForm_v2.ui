@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1356</width>
-    <height>316</height>
+    <width>1406</width>
+    <height>579</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -24,15 +24,15 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QWidget {
-	background-color:#ddeee4;
+	background-color:#333e50;
 }
 
 QPushButton {
 	color:black;
-	background-color:#f8fcfa;
+	background-color:#4DB0A8;
 	border:none;
 	border-radius:15px;
-	padding:8px 40px;
+	padding:8px 10px;
 	font-family:arial;
 	font-weight:bold;
 	font-size:15px;
@@ -40,20 +40,25 @@ QPushButton {
 
 QPushButton:hover {
 	color:white;
-	background-color:#13ec71;
+	cursor:PointingHand;
+}
+
+LANSocketLabel {
+	background-color:#333e50;
 }
 
 LANSocketLabel:hover {
-	border:3px solid #FF17365D;
+	border:3px solid #4DB0A8;
 	border-radius:5px;
 }
 
 QGroupBox {
     border: 1px solid gray;
-    border-color: #FF17365D;
+    border-color: #4DB0A8;
     margin-top: 27px;
     font-size: 14px;
     border-radius: 15px;
+	background-color:#333e50;
 }
 
 QGroupBox::title {
@@ -62,38 +67,65 @@ QGroupBox::title {
     border-top-left-radius: 15px;
     border-top-right-radius: 15px;
     padding: 5px 50px;
-    background-color: #FF17365D;
+    background-color: #4DB0A8;
     color: rgb(255, 255, 255);
 }
 
-QTableWidget {
-	border:1px solid gray;
-	background-color:white;
-	margin:0 auto;
-	padding:0;
+QTableView {
+	color:white;
+	background-color:#586578;
+	selection-background-color:#4DB0A8;
+	selection-color:white;
 }
-</string>
+
+QHeaderView::section {
+	border:3px solid #4DB0A8;
+	color:white;
+	font-size: 14px;
+	font-weight:bold;
+	background-color:#4DB0A8;
+}
+
+QTableView QTableCornerButton::section {
+    background: #4DB0A8;
+}
+
+QTableView QScrollBar:vertical {
+	border:none;
+	border-radius:10px;
+	width:10px;
+}
+
+QTableView QScrollBar::handle:vertical {
+	border:1px solid #4DB0A8;
+	background-color: #4DB0A8;
+	border-radius:5px;
+}
+
+QTableView QScrollArea {
+	background-color:#586578;
+}</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_2">
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="refresh">
        <property name="cursor">
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="text">
-        <string>Button</string>
+        <string>Обновить</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_2">
+      <widget class="QPushButton" name="changeDevice">
        <property name="cursor">
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="text">
-        <string>Button</string>
+        <string>Сменить устройство</string>
        </property>
       </widget>
      </item>
@@ -111,12 +143,12 @@ QTableWidget {
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_3">
+      <widget class="QPushButton" name="exit">
        <property name="cursor">
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="text">
-        <string>Button</string>
+        <string>Завершить работу</string>
        </property>
       </widget>
      </item>
@@ -154,6 +186,9 @@ QTableWidget {
          <property name="mouseTracking">
           <bool>true</bool>
          </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
          <property name="title">
           <string>Превью вызванного устройства:</string>
          </property>
@@ -170,7 +205,7 @@ QTableWidget {
           <item>
            <widget class="QGroupBox" name="groupBox_2">
             <property name="styleSheet">
-             <string notr="true">background-color:#dfdfdfff;</string>
+             <string notr="true"/>
             </property>
             <property name="title">
              <string>GroupBox</string>
@@ -222,10 +257,10 @@ QTableWidget {
         </size>
        </property>
        <property name="styleSheet">
-        <string notr="true">selection-background-color: lightgray;
-selection-color:black;
-
-section { background-color:gray }</string>
+        <string notr="true"/>
+       </property>
+       <property name="verticalScrollBarPolicy">
+        <enum>Qt::ScrollBarAlwaysOn</enum>
        </property>
        <property name="sizeAdjustPolicy">
         <enum>QAbstractScrollArea::AdjustToContents</enum>

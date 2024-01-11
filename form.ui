@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>632</width>
-    <height>514</height>
+    <width>644</width>
+    <height>364</height>
    </rect>
   </property>
   <property name="mouseTracking">
@@ -18,21 +18,22 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QWidget {
-	background-color:#ddeee4;
+	background-color:#333e50;
 }
 
 QPushButton {
 	color:black;
-	background-color:#f8fcfa;
-	width:200px;
-	height:150px;
+	background-color:#4DB0A8;
 	border:none;
-	border-radius:20px;
-	margin:0;
+	border-radius:15px;
+	font-family:arial;
+	font-weight:bold;
+	font-size:15px;
 }
 
 QPushButton:hover {
-	background-color:#13ec71;
+	color:white;
+	cursor:PointingHand;
 }
 QLabel {
 	font: arial;

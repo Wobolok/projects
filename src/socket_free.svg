@@ -89,7 +89,7 @@
          ry="27.888412" />
       <path
          id="rect1-1"
-         style="fill:#dfdfdf;fill-opacity:1;stroke:#000000;stroke-width:1.9367;stroke-linejoin:round;stroke-miterlimit:4;paint-order:normal"
+         style="fill:#333e50;fill-opacity:1;stroke:#000000;stroke-width:1.9367;stroke-linejoin:round;stroke-miterlimit:4;paint-order:normal"
          d="m 75.65429,53.03281 c -2.681077,0 -4.839498,2.158421 -4.839498,4.839498 v 8.806698 H 56.319036 c -3.967086,0 -7.160804,3.194234 -7.160804,7.16132 v 7.912178 h -2.36678 c -7.142927,0 -12.89327,5.750344 -12.89327,12.89327 v 62.068046 c 0,7.14292 5.750343,12.89379 12.89327,12.89379 H 163.28357 c 7.14292,0 12.89327,-5.75087 12.89327,-12.89379 V 94.645774 c 0,-7.142926 -5.75035,-12.89327 -12.89327,-12.89327 h -3.0887 v -7.912178 c 0,-3.967086 -3.19372,-7.16132 -7.1608,-7.16132 H 140.0731 v -8.806698 c 0,-2.681077 -2.15842,-4.839498 -4.8395,-4.839498 z" />
       <g
          id="g3"
@@ -127,15 +127,6 @@
            y="141.03209"
            ry="6.8811765" />
       </g>
-      <text
-         xml:space="preserve"
-         transform="matrix(0.26458333,0,0,0.26458333,6.8125529,31.337135)"
-         id="text"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:144px;line-height:0;font-family:Arial;-inkscape-font-specification:'Arial, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;white-space:pre;shape-inside:url(#rect5);fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:7.28693;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;paint-order:normal"
-         inkscape:label="text"><tspan
-           x="219.63379"
-           y="321.06411"
-           id="tspan1">Text</tspan></text>
     </g>
   </g>
 </svg>

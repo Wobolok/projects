@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>256</width>
-    <height>214</height>
+    <width>272</width>
+    <height>273</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,12 +15,12 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QWidget {
-	background-color:#ddeee4;
+	background-color:#333e50;
 }
 
 QPushButton {
 	color:black;
-	background-color:#f8fcfa;
+	background-color:#4DB0A8;
 	border:none;
 	border-radius:15px;
 	padding:8px 40px;
@@ -31,19 +31,13 @@ QPushButton {
 
 QPushButton:hover {
 	color:white;
-	background-color:#13ec71;
-}
-
-QLabel {
-	font-family:arial;
-	font-weight:bold;
-	font-size:15px;
-	min-width:70px;
+	cursor:PointingHand;
 }
 
 QLineEdit {
-	color:black;
-	background-color:#f8fcfa;
+	color:#747C86;
+	font-weight:bold;
+	background-color:#2F3A4A;
 	padding:5px 5px;
 	max-width:200px;
 	min-width:150px;
@@ -51,68 +45,180 @@ QLineEdit {
 	border:none;
 }
 
-QLineEdit:hover {
-	background-color:rgba(220,220,220,0.9);
+QRadioButton {
+	color:#747C86;
+	font-family:arial;
+	font-weight:bold;
+}
+
+QRadioButton::indicator {
+	width:16px;
+	height:16px;
+    background-color:#747C86;
+	color:#747C86;
+	border:3px solid #2F3A4A;
+	border-radius:11px;
+}
+
+QRadioButton::indicator::checked {
+    background-color:#4DB0A8;
+	color:#4DB0A8;
+	border:3px solid #2F3A4A;
 }</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Логин:</string>
+      <widget class="QLineEdit" name="login">
+       <property name="placeholderText">
+        <string>Логин/почта</string>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
        </property>
       </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="login"/>
      </item>
     </layout>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>Пароль:</string>
+      <widget class="QLineEdit" name="passwd">
+       <property name="placeholderText">
+        <string>Пароль</string>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
        </property>
       </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="passwd"/>
      </item>
     </layout>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_7">
      <item>
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>IP-адрес:</string>
+      <widget class="QLineEdit" name="ip">
+       <property name="placeholderText">
+        <string>IP-адрес</string>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
        </property>
       </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="ip"/>
      </item>
     </layout>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_5">
      <item>
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>Порт:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QLineEdit" name="port">
        <property name="text">
         <string>22</string>
        </property>
+       <property name="placeholderText">
+        <string>Порт</string>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
+       </property>
       </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="ssh">
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="text">
+        <string>SSH</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="com">
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="text">
+        <string>COM-порт</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_6">
+     <item>
+      <spacer name="horizontalSpacer_5">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="comNum">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+       <property name="placeholderText">
+        <string>COM-port</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_6">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>
@@ -171,6 +277,105 @@ QLineEdit:hover {
    </item>
   </layout>
  </widget>
- <resources/>
- <connections/>
+ <resources>
+  <include location="res.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>com</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>comNum</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>136</x>
+     <y>141</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>128</x>
+     <y>169</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ssh</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>comNum</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>72</x>
+     <y>145</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>79</x>
+     <y>174</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>com</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>port</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>160</x>
+     <y>139</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>154</x>
+     <y>112</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>com</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ip</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>174</x>
+     <y>138</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>183</x>
+     <y>81</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>com</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>port</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>115</x>
+     <y>138</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>100</x>
+     <y>115</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>com</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ip</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>114</x>
+     <y>147</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>108</x>
+     <y>80</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

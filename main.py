@@ -33,7 +33,7 @@ class LANSocketLabel(QSvgWidget):
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
 
     def mousePressEvent(self, ev):
-        if ev.button() == Qt.LeftButton:
+        if ev.button() == Qt.LeftButton or ev.button() == Qt.RightButton:
             selectedSocket = self.getId()
             self.clicked.emit(selectedSocket)
             print(selectedSocket)
@@ -287,6 +287,13 @@ class MainWindow(QMainWindow):
     def onclick(self):
         self.win = AnotherWindow()
         uic.loadUi('./loginForm.ui', self.win)
+
+
+
+        self.win.login.addAction(QIcon(QPixmap('./src/login.png')),QLineEdit.LeadingPosition)
+        self.win.passwd.addAction(QIcon(QPixmap('./src/password.png')), QLineEdit.LeadingPosition)
+        self.win.ip.addAction(QIcon(QPixmap('./src/ip.png')), QLineEdit.LeadingPosition)
+        self.win.port.addAction(QIcon(QPixmap('./src/port.png')), QLineEdit.LeadingPosition)
         self.win.setWindowModality(QtCore.Qt.WindowModality.ApplicationModal)
         self.win.ok.clicked.connect(self.enter)
         self.win.passwd.setEchoMode(QLineEdit.Password)
@@ -322,11 +329,6 @@ if len(ports) != 0:
             gb = QGroupBox()
             gb.setLayout(comm)
             gb.setTitle('Коммутатор ' + currComm)
-            gb.setStyleSheet('QWidget {background-color:#dfdfdfff;} QGroupBox:title {subcontrol-origin: '
-                             'margin;subcontrol-position: top'
-                             'center;border-top-left-radius:'
-                             '15px;border-top-right-radius: 15px;padding: 5px 50px;background-color: #FF17365D;color: '
-                             'rgb(255, 255, 255);};')
             window.findChild(QGroupBox, 'groupBox').layout().addWidget(gb)
             fillingComm = comm
 
@@ -378,33 +380,56 @@ if len(ports) != 0:
     # Поиск сокета в превью по нажатию на строку таблицы
     def selectSocket():
         for lab in lanSockets:
-            lab.getIco().setStyleSheet('border:none;:hover {border:3px solid #FF17365D;border-radius:5px;};')
+            lab.getIco().setStyleSheet('border:none;:hover {border:3px solid #4DB0A8;border-radius:5px;};')
 
         commName = window.findChild(QTableWidget, 'lanSockets').item(window.findChild(QTableWidget, 'lanSockets').currentRow(), 0).text()
         name = window.findChild(QTableWidget, 'lanSockets').item(window.findChild(QTableWidget, 'lanSockets').currentRow(), 1).text()
         for lab in lanSockets:
             if lab.getName() == name and lab.getCommName() == commName:
                 print('clicked')
-                lab.getIco().setStyleSheet('border:3px solid #FF17365D;border-radius:5px;padding:0;margin:0;')
+                lab.getIco().setStyleSheet('border:3px solid #4DB0A8;border-radius:5px;padding:0;margin:0;')
 
     def selectRow(row):
         window.findChild(QTableWidget, 'lanSockets').selectRow(row)
         for soc in window.findChildren(LANSocketLabel):
             if soc.getId() != row:
-                soc.setStyleSheet('border:none; :hover {border:3px solid #FF17365D;border-radius:5px;};')
+                soc.setStyleSheet('border:none; :hover {border:3px solid #4DB0A8;border-radius:5px;};')
             else:
-                soc.setStyleSheet('border:3px solid #FF17365D;border-radius:5px;padding:0;margin:0;')
+                soc.setStyleSheet('border:3px solid #4DB0A8;border-radius:5px;padding:0;margin:0;')
 
     def showMenu():
+        speedMenu = QMenu()
+        speedMenu.addAction('auto')
+        speedMenu.addAction('a-100')
+        speedMenu.addAction('a-1000')
+        speedMenu.setStyleSheet('QMenu {border:none;background-color:#586578;}'
+                           'QMenu::item:selected {background-color:#4DB0A8;border:3px solid #4DB0A8;}'
+                           'QMenu::item {color:white;border:3px solid #586578;padding:5px 10px;border-radius:5px;}')
         menu = QMenu()
-        menu.setStyleSheet('border-radius:10px;border:3px solid #FF17365D;')
+        menu.setStyleSheet('QMenu {border:1px solid #4DB0A8;background-color:#586578;}'
+                           'QMenu::item:selected {background-color:#4DB0A8;border:3px solid #4DB0A8;}'
+                           'QMenu::item {color:white;border:3px solid #586578;padding:5px 10px;border-radius:5px;}')
         editVlan = QAction(QIcon(QPixmap('./src/changeVlan.png')), 'Изменить VLAN')
         editSpeed = QAction(QIcon(QPixmap('./src/changeSpeed.png')), 'Изменить режим скорости')
+        editSpeed.setMenu(speedMenu)
         setTrunk = QAction(QIcon(QPixmap('./src/changeMode.png')), 'Изменить на trunk')
-        setAccess = QAction(QIcon(QPixmap('./src/changeSpeed.png')), 'Изменить на access')
-        menu.addAction(editVlan)
-        menu.addAction(editSpeed)
-        menu.addAction(setTrunk)
+        setAccess = QAction(QIcon(QPixmap('./src/changeMode.png')), 'Изменить на access')
+
+        if window.findChild(QTableWidget, 'lanSockets').item(
+                window.findChild(QTableWidget, 'lanSockets').currentRow(), 3).text() != 'trunk':
+            print(window.findChild(QTableWidget, 'lanSockets').item(
+                window.findChild(QTableWidget, 'lanSockets').currentRow(), 3).text())
+            menu.clear()
+            menu.addAction(editVlan)
+            menu.addAction(editSpeed)
+            menu.addAction(setTrunk)
+        else:
+            print(window.findChild(QTableWidget, 'lanSockets').item(
+                window.findChild(QTableWidget, 'lanSockets').currentRow(), 3).text())
+            menu.clear()
+            menu.addAction(editVlan)
+            menu.addAction(editSpeed)
+            menu.addAction(setAccess)
         menu.exec_(QCursor.pos())
 
 
