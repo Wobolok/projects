@@ -34,6 +34,7 @@ QPushButton {
 QPushButton:hover {
 	color:white;
 	cursor:PointingHand;
+	border:5px solid #333e50;
 }
 QLabel {
 	font: arial;

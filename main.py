@@ -85,12 +85,7 @@ class LANSocket():
         self.ico = LANSocketLabel()
         svgDoc = QDomDocument()
         svgDoc.setContent(svg)
-        elemText = svgDoc.documentElement().firstChildElement()
-        text = elemText.elementsByTagName('text')
-        if text.size() and text.at(0).isElement():
-            elem = text.at(0).toElement()
-            elem.childNodes().at(0).setNodeValue(self.name)
-        # elemText.firstChild().toText().setData(self.name)
+        svgDoc.childNodes().at(2).childNodes().at(2).childNodes().at(1).childNodes().at(0).firstChild().setNodeValue(self.getName())
         svg.close()
         self.ico.load(svgDoc.toByteArray())
         self.ico.setId(self.getId())
@@ -185,8 +180,20 @@ class MainWindow(QMainWindow):
 
         self.subW.pushButton.clicked.connect(self.onclick)
 
+    def clearContent(self):
+        gbox = window.findChild(QGroupBox, 'groupBox')
+        table = window.findChild(QTableWidget, 'lanSockets')
+        table.setRowCount(0)
+        for g in gbox.findChildren(QGroupBox):
+            g.close()
+        self.subW.show()
+
+    def check(self):
+        print('check')
+        self.readData('')
+
     def selectRow(self):
-        self.findChild(QTableWidget, 'lanSockets').selectRow(selectedSocket)
+        self.findChild(QTableWidget, 'lanSockets').selectRow()
 
     def readData(self, data):
         ports.clear()
@@ -198,6 +205,80 @@ class MainWindow(QMainWindow):
             if line.startswith('port'):
                 if len(line.split()) > 5:
                     ports.append(line.split(maxsplit=5))
+
+        prevComm = None
+
+        comm = QGridLayout()
+        comm.setObjectName('socketsPreview' + ports[0][0][4])
+        comm.setHorizontalSpacing(0)
+        comm.setVerticalSpacing(0)
+        gb = QGroupBox()
+        gb.setLayout(comm)
+        gb.setTitle('Коммутатор ' + ports[0][0][4])
+        self.findChild(QGroupBox, 'groupBox').layout().addWidget(gb)
+        fillingComm = comm
+
+        for port in ports:
+            currComm = port[0][4]
+
+            if prevComm is not None and prevComm != currComm:
+                comm = QGridLayout()
+                comm.setObjectName('socketsPreview' + currComm)
+                comm.setHorizontalSpacing(0)
+                comm.setVerticalSpacing(0)
+                gb = QGroupBox()
+                gb.setLayout(comm)
+                gb.setTitle('Коммутатор ' + currComm)
+                self.findChild(QGroupBox, 'groupBox').layout().addWidget(gb)
+                fillingComm = comm
+
+            j = ports.index(port)
+            parameters = []
+            soc = LANSocket()
+            soc.setId(socketId)
+            soc.setWlan(port[2])
+            soc.setName(port[0].split('.')[2])
+            if (int(soc.getName())) % 2 == 0:
+                soc.setPos(1, int(soc.getName()) - fillingComm.columnCount() + 1)
+            else:
+                soc.setPos(0, int(soc.getName()) - fillingComm.columnCount() + 1)
+            soc.setCommName(port[0][4])
+            if port[1] == 'notconnect':
+                soc.setStatus(port[1], './src/socket_free.svg')
+            elif port[1] == 'connected' and port[2] == 'trunk':
+                soc.setStatus(port[1], './src/socket_trunk.svg')
+            elif port[1] == 'connected' and port[2] != 'trunk':
+                soc.setStatus(port[1], './src/socket_used.svg')
+            soc.setSpeed(port[4])
+            soc.setDuplex(port[3])
+            soc.setType(port[5])
+
+            soc.getIco().clicked.connect(self.selectRow)
+            soc.getIco().customContextMenuRequested.connect(self.showMenu)
+
+            lanSockets.append(soc)
+
+            # parameters.append(str(soc.getId()))
+            parameters.append(soc.getCommName())
+            parameters.append(soc.getName())
+            parameters.append(soc.getStatus())
+            parameters.append(soc.getWlan())
+            parameters.append(soc.getDuplex())
+            parameters.append(soc.getSpeed())
+            parameters.append(soc.getType())
+
+            # Заполнение превью комика
+            fillingComm.addWidget(soc.getIco(), soc.getPosX(), soc.getPosY(), Qt.AlignCenter)
+            # Заполнение таблицы по вебморде
+            self.findChild(QTableWidget, 'lanSockets').insertRow(socketId)
+            for k in range(self.findChild(QTableWidget, 'lanSockets').columnCount()):
+                itm = QTableWidgetItem()
+                itm.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                itm.setText(parameters[k])
+                self.findChild(QTableWidget, 'lanSockets').setItem(socketId, k, itm)
+
+            socketId += 1
+            prevComm = currComm
 
     def enter(self):
         if self.win.login.text() == '' or self.win.passwd.text() == '' or self.win.port.text() == '':
@@ -287,9 +368,6 @@ class MainWindow(QMainWindow):
     def onclick(self):
         self.win = AnotherWindow()
         uic.loadUi('./loginForm.ui', self.win)
-
-
-
         self.win.login.addAction(QIcon(QPixmap('./src/login.png')),QLineEdit.LeadingPosition)
         self.win.passwd.addAction(QIcon(QPixmap('./src/password.png')), QLineEdit.LeadingPosition)
         self.win.ip.addAction(QIcon(QPixmap('./src/ip.png')), QLineEdit.LeadingPosition)
@@ -304,6 +382,64 @@ class MainWindow(QMainWindow):
         self.win.ip.setValidator(ipValidator)
         self.win.show()
 
+    # Поиск сокета в превью по нажатию на строку таблицы
+    def selectSocket(self):
+        for lab in lanSockets:
+            lab.getIco().setStyleSheet('border:none;:hover {border:3px solid #4DB0A8;border-radius:5px;};')
+
+        commName = self.findChild(QTableWidget, 'lanSockets').item(
+            self.findChild(QTableWidget, 'lanSockets').currentRow(), 0).text()
+        name = self.findChild(QTableWidget, 'lanSockets').item(
+            self.findChild(QTableWidget, 'lanSockets').currentRow(), 1).text()
+        for lab in lanSockets:
+            if lab.getName() == name and lab.getCommName() == commName:
+                lab.getIco().setStyleSheet('border:3px solid #4DB0A8;border-radius:5px;padding:0;margin:0;')
+
+    # Поиск строки по нажатию на сокет
+    def selectRow(self, row):
+        table = self.findChild(QTableWidget, 'lanSockets')
+        table.selectRow(row)
+        table.scrollTo(table.selectedIndexes()[0], QAbstractItemView.PositionAtCenter)
+        for soc in self.findChildren(LANSocketLabel):
+            if soc.getId() != row:
+                soc.setStyleSheet('border:none; :hover {border:3px solid #4DB0A8;border-radius:5px;};')
+            else:
+                soc.setStyleSheet('border:3px solid #4DB0A8;border-radius:5px;padding:0;margin:0;')
+
+    # Контекстное
+    def showMenu(self):
+        speedMenu = QMenu()
+        speedMenu.addAction('auto')
+        speedMenu.addAction('a-100')
+        speedMenu.addAction('a-1000')
+        speedMenu.setStyleSheet('QMenu {border:none;background-color:#586578;}'
+                                'QMenu::item:selected {background-color:#4DB0A8;border:3px solid #4DB0A8;}'
+                                'QMenu::item {color:white;border:3px solid #586578;padding:5px 10px;border-radius:5px;}')
+        menu = QMenu()
+        menu.setStyleSheet('QMenu {border:1px solid #4DB0A8;background-color:#586578;}'
+                           'QMenu::item:selected {background-color:#4DB0A8;border:3px solid #4DB0A8;}'
+                           'QMenu::item {color:white;border:3px solid #586578;padding:5px 10px;border-radius:5px;}')
+        editVlan = QAction(QIcon(QPixmap('./src/changeVlan.png')), 'Изменить VLAN')
+        showVlan = QAction(QIcon(QPixmap('./src/show.png')), 'Показать все VLAN')
+        editSpeed = QAction(QIcon(QPixmap('./src/changeSpeed.png')), 'Изменить режим скорости')
+        editSpeed.setMenu(speedMenu)
+        setTrunk = QAction(QIcon(QPixmap('./src/changeMode.png')), 'Изменить на trunk')
+        setAccess = QAction(QIcon(QPixmap('./src/changeMode.png')), 'Изменить на access')
+
+        if self.findChild(QTableWidget, 'lanSockets').item(
+                self.findChild(QTableWidget, 'lanSockets').currentRow(), 3).text() != 'trunk':
+            menu.clear()
+            menu.addAction(editVlan)
+            menu.addAction(editSpeed)
+            menu.addAction(setTrunk)
+        else:
+            menu.clear()
+            menu.addAction(editVlan)
+            menu.addAction(showVlan)
+            menu.addAction(editSpeed)
+            menu.addAction(setAccess)
+        menu.exec_(QCursor.pos())
+
 
 app = QApplication(sys.argv)
 
@@ -314,129 +450,12 @@ window.setMinimumSize(1200, 900)
 
 window.readData('')
 
-if len(ports) != 0:
-    fillingComm = window.findChild(QGridLayout, 'socketsPreview')
-    window.findChild(QGroupBox, 'groupBox_2').setTitle('Коммутатор ' + ports[0][0][4])
+# ==================================Коннекты===================================
 
-    for port in ports:
-        currComm = port[0][4]
-
-        if prevComm is not None and prevComm != currComm:
-            comm = QGridLayout()
-            comm.setObjectName('socketsPreview' + currComm)
-            comm.setHorizontalSpacing(0)
-            comm.setVerticalSpacing(0)
-            gb = QGroupBox()
-            gb.setLayout(comm)
-            gb.setTitle('Коммутатор ' + currComm)
-            window.findChild(QGroupBox, 'groupBox').layout().addWidget(gb)
-            fillingComm = comm
-
-        j = ports.index(port)
-        parameters = []
-        soc = LANSocket()
-        soc.setId(socketId)
-        soc.setWlan(port[2])
-        soc.setName(port[0].split('.')[2])
-        if (int(soc.getName())) % 2 == 0:
-            soc.setPos(1, int(soc.getName()) - fillingComm.columnCount()+1)
-        else:
-            soc.setPos(0, int(soc.getName()) - fillingComm.columnCount()+1)
-        soc.setCommName(port[0][4])
-        if port[1] == 'notconnect':
-            soc.setStatus(port[1], './src/socket_free.svg')
-        elif port[1] == 'connected' and port[2] == 'trunk':
-            soc.setStatus(port[1], './src/socket_trunk.svg')
-        elif port[1] == 'connected' and port[2] != 'trunk':
-            soc.setStatus(port[1], './src/socket_used.svg')
-        soc.setSpeed(port[4])
-        soc.setDuplex(port[3])
-        soc.setType(port[5])
-        lanSockets.append(soc)
-
-        # parameters.append(str(soc.getId()))
-        parameters.append(soc.getCommName())
-        parameters.append(soc.getName())
-        parameters.append(soc.getStatus())
-        parameters.append(soc.getWlan())
-        parameters.append(soc.getDuplex())
-        parameters.append(soc.getSpeed())
-        parameters.append(soc.getType())
-
-        # Заполнение превью комика
-        fillingComm.addWidget(soc.getIco(), soc.getPosX(), soc.getPosY(), Qt.AlignCenter)
-        # Заполнение таблицы по вебморде
-        window.findChild(QTableWidget, 'lanSockets').insertRow(socketId)
-        for k in range(window.findChild(QTableWidget, 'lanSockets').columnCount()):
-            itm = QTableWidgetItem()
-            itm.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            itm.setText(parameters[k])
-            window.findChild(QTableWidget, 'lanSockets').setItem(socketId, k, itm)
-
-        socketId += 1
-        prevComm = currComm
-
-
-    # Поиск сокета в превью по нажатию на строку таблицы
-    def selectSocket():
-        for lab in lanSockets:
-            lab.getIco().setStyleSheet('border:none;:hover {border:3px solid #4DB0A8;border-radius:5px;};')
-
-        commName = window.findChild(QTableWidget, 'lanSockets').item(window.findChild(QTableWidget, 'lanSockets').currentRow(), 0).text()
-        name = window.findChild(QTableWidget, 'lanSockets').item(window.findChild(QTableWidget, 'lanSockets').currentRow(), 1).text()
-        for lab in lanSockets:
-            if lab.getName() == name and lab.getCommName() == commName:
-                print('clicked')
-                lab.getIco().setStyleSheet('border:3px solid #4DB0A8;border-radius:5px;padding:0;margin:0;')
-
-    def selectRow(row):
-        window.findChild(QTableWidget, 'lanSockets').selectRow(row)
-        for soc in window.findChildren(LANSocketLabel):
-            if soc.getId() != row:
-                soc.setStyleSheet('border:none; :hover {border:3px solid #4DB0A8;border-radius:5px;};')
-            else:
-                soc.setStyleSheet('border:3px solid #4DB0A8;border-radius:5px;padding:0;margin:0;')
-
-    def showMenu():
-        speedMenu = QMenu()
-        speedMenu.addAction('auto')
-        speedMenu.addAction('a-100')
-        speedMenu.addAction('a-1000')
-        speedMenu.setStyleSheet('QMenu {border:none;background-color:#586578;}'
-                           'QMenu::item:selected {background-color:#4DB0A8;border:3px solid #4DB0A8;}'
-                           'QMenu::item {color:white;border:3px solid #586578;padding:5px 10px;border-radius:5px;}')
-        menu = QMenu()
-        menu.setStyleSheet('QMenu {border:1px solid #4DB0A8;background-color:#586578;}'
-                           'QMenu::item:selected {background-color:#4DB0A8;border:3px solid #4DB0A8;}'
-                           'QMenu::item {color:white;border:3px solid #586578;padding:5px 10px;border-radius:5px;}')
-        editVlan = QAction(QIcon(QPixmap('./src/changeVlan.png')), 'Изменить VLAN')
-        editSpeed = QAction(QIcon(QPixmap('./src/changeSpeed.png')), 'Изменить режим скорости')
-        editSpeed.setMenu(speedMenu)
-        setTrunk = QAction(QIcon(QPixmap('./src/changeMode.png')), 'Изменить на trunk')
-        setAccess = QAction(QIcon(QPixmap('./src/changeMode.png')), 'Изменить на access')
-
-        if window.findChild(QTableWidget, 'lanSockets').item(
-                window.findChild(QTableWidget, 'lanSockets').currentRow(), 3).text() != 'trunk':
-            print(window.findChild(QTableWidget, 'lanSockets').item(
-                window.findChild(QTableWidget, 'lanSockets').currentRow(), 3).text())
-            menu.clear()
-            menu.addAction(editVlan)
-            menu.addAction(editSpeed)
-            menu.addAction(setTrunk)
-        else:
-            print(window.findChild(QTableWidget, 'lanSockets').item(
-                window.findChild(QTableWidget, 'lanSockets').currentRow(), 3).text())
-            menu.clear()
-            menu.addAction(editVlan)
-            menu.addAction(editSpeed)
-            menu.addAction(setAccess)
-        menu.exec_(QCursor.pos())
-
-
-    window.findChild(QTableWidget, 'lanSockets').itemClicked.connect(selectSocket)
-    for soc in window.findChildren(LANSocketLabel):
-        soc.clicked.connect(selectRow)
-        soc.customContextMenuRequested.connect(showMenu)
+window.findChild(QPushButton, 'exit').clicked.connect(window.close)
+window.findChild(QPushButton, 'changeDevice').clicked.connect(window.clearContent)
+window.findChild(QPushButton, 'refresh').clicked.connect(window.check)
+window.findChild(QTableWidget, 'lanSockets').itemClicked.connect(window.selectSocket)
 
 window.show()
 
