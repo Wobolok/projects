@@ -90,6 +90,12 @@ class LANSocket():
         self.ico.load(svgDoc.toByteArray())
         self.ico.setId(self.getId())
         self.ico.setFixedSize(50, 50)
+
+        # self.pix = QPixmap(QPixmap(imgPath).scaled(50, 50, Qt.KeepAspectRatio))
+        # self.ico = LANSocketLabel()
+        # self.ico.setPixmap(self.pix)
+        # self.ico.setId(self.getId())
+        # self.ico.setOpenExternalLinks(True)
         self.imgPath = imgPath
 
     def setSpeed(self, speed):
@@ -182,12 +188,8 @@ class MainWindow(QMainWindow):
             g.close()
         self.subW.show()
 
-    def refresh(self):
-        gbox = window.findChild(QGroupBox, 'groupBox')
-        table = window.findChild(QTableWidget, 'lanSockets')
-        table.setRowCount(0)
-        for g in gbox.findChildren(QGroupBox):
-            g.close()
+    def check(self):
+        print('check')
         self.readData('')
 
     def selectRow(self):
@@ -452,7 +454,7 @@ window.readData('')
 
 window.findChild(QPushButton, 'exit').clicked.connect(window.close)
 window.findChild(QPushButton, 'changeDevice').clicked.connect(window.clearContent)
-window.findChild(QPushButton, 'refresh').clicked.connect(window.refresh)
+window.findChild(QPushButton, 'refresh').clicked.connect(window.check)
 window.findChild(QTableWidget, 'lanSockets').itemClicked.connect(window.selectSocket)
 
 window.show()
