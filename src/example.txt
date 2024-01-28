@@ -1,21 +1,21 @@
 show interface status
 Port       Name               Status            Vlan Duplex   Speed Type
-port4.0.1                     notconnect       trunk auto      auto 1000BASE-SX
+port4.0.1                     notconnect       trunk auto      auto not present
 port4.0.2                     notconnect           2 auto      auto not present
 port4.0.3                     notconnect           2 auto      auto not present
 port4.0.4                     notconnect           2 auto      auto not present
 port4.0.5                     notconnect           2 auto      auto not present
 port4.0.6                     notconnect           2 auto      auto not present
-port4.0.7                     notconnect           2 auto      auto not present
+port4.0.7                     notconnect          64 auto      auto not present
 port4.0.8                     notconnect           2 auto      auto not present
-port4.0.9                     notconnect           2 auto      auto not present
+port4.0.9                     notconnect           2 auto      auto 1000BASE-SX
 port4.0.10                    notconnect           2 auto      auto not present
 port4.0.11                    notconnect           2 auto      auto not present
 port4.0.12                    notconnect           2 auto      auto not present
 port4.0.13                    notconnect           2 auto      auto not present
 port4.0.14                    notconnect           2 auto      auto not present
 port4.0.15                    notconnect           2 auto      auto not present
-port4.0.16                    notconnect           2 auto      auto not present
+port4.0.16                    notconnect          64 auto      auto not present
 port4.0.17                    notconnect           2 auto      auto not present
 port4.0.18                    notconnect           2 auto      auto not present
 port4.0.19                    notconnect           2 auto      auto not present
