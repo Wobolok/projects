@@ -193,7 +193,12 @@ class MainWindow(QMainWindow):
     def selectRow(self):
         self.findChild(QTableWidget, 'lanSockets').selectRow()
 
-    def readData(self, data):
+    def createConfig(self, data):
+        with open('./src/example.txt', "w") as file:
+            file.write(data)
+            return file
+
+    def readData(self, data_1):
         ports.clear()
         lanSockets.clear()
         socketId = 0
@@ -201,6 +206,7 @@ class MainWindow(QMainWindow):
         data = file.readlines()
         for line in data:
             if line.startswith('port'):
+                print(line)
                 if len(line.split()) > 5:
                     ports.append(line.split(maxsplit=5))
 
@@ -279,10 +285,10 @@ class MainWindow(QMainWindow):
             prevComm = currComm
 
     def enter(self):
-        if self.win.login.text() == '' or self.win.passwd.text() == '' or self.win.port.text() == '':
-            QMessageBox.warning(self, 'Ошибка при попытке подключения',
-                                'Неудачная попытка подключения: не все поля заполнены!')  # ошибка входа
-        else:
+        # if self.win.login.text() == '' or self.win.passwd.text() == '' or self.win.port.text() == '':
+        #     QMessageBox.warning(self, 'Ошибка при попытке подключения',
+        #                         'Неудачная попытка подключения: не все поля заполнены!')  # ошибка входа
+        # else:
             self.win.connStatus.setStyleSheet('color:green;text-align:center;')
             self.win.connStatus.setText('Подключение...')
             read_thread = threading.Thread(target=self.connect)
@@ -299,26 +305,33 @@ class MainWindow(QMainWindow):
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
             # ssh.connect(self.win.ip.text(), username=self.win.login.text(), password=self.win.passwd.text())
-            ssh.connect('10.16.7.74', username='obi', password='ndszi3917')
+            ssh.connect('10.16.7.79', username='obi', password='ndszi3917')
             channel = ssh.invoke_shell()
-            time.sleep(1)
+            if channel.active:
+                self.win.connStatus.setStyleSheet('color:green;text-align:center;')
+                self.win.connStatus.setText('Успешно подключено.')
+                self.win.close()
+                self.subW.close()
+                self.win.connStatus.clear()
+            time.sleep(0.5)
             channel.send('enable\n')
-            time.sleep(1)
+            time.sleep(0.5)
             output = channel.recv(65535)
-            channel.send('screen-length 0 temporary\n')
-            print(output.decode('utf-8'))
-            channel.send('show running-config\n')
-            for kaka in range(10):
-                time.sleep(1)
+            #print(output.decode('utf-8'))
+            channel.send('show interface status\n')
+            for kaka in range(4):
+                time.sleep(0.1)
                 channel.send(' ')
             while True:
                 if channel.recv_ready():
                     output = channel.recv(65535).decode('utf-8')
-                    print(output)
+                    #print(output)
+                    self.readData(output)
                 else:
                     break
             output = channel.recv(65535)
-            print(output.decode('utf-8'))
+            #print(output.decode('utf-8'))
+            #self.readData(output.decode('utf-8'))
 
         except TimeoutError:
             self.win.connStatus.setStyleSheet('color:red;text-align:center;font-size:10px;')
@@ -446,7 +459,6 @@ window.setWindowIcon(QIcon('./src/appIcon.png'))
 window.setWindowTitle('Communicator')
 window.setMinimumSize(1200, 900)
 
-window.readData('')
 
 # ==================================Коннекты===================================
 
