@@ -161,6 +161,8 @@ class WarWindow(QWidget):
 
 
 class MainWindow(QMainWindow):
+    xyi = pyqtSignal(str)
+
     def __init__(self):
         super().__init__()
         self.setMouseTracking(True)
@@ -180,6 +182,8 @@ class MainWindow(QMainWindow):
 
         self.subW.pushButton.clicked.connect(self.onclick)
 
+        self.ssh = None
+        self.channel = None
     def clearContent(self):
         gbox = window.findChild(QGroupBox, 'groupBox')
         table = window.findChild(QTableWidget, 'lanSockets')
@@ -188,19 +192,46 @@ class MainWindow(QMainWindow):
             g.close()
         self.subW.show()
 
+<<<<<<< HEAD
     def check(self):
         print('check')
         self.readData('')
+=======
+
+    def check(self):
+        gbox = window.findChild(QGroupBox, 'groupBox')
+        table = window.findChild(QTableWidget, 'lanSockets')
+        table.setRowCount(0)
+        for g in gbox.findChildren(QGroupBox):
+            g.close()
+        output = self.channel.recv(65535)
+        self.channel.send('show interface status\n')
+        for kaka in range(4):
+            time.sleep(0.1)
+            self.channel.send(' ')
+        while True:
+            if self.channel.recv_ready():
+                output = self.channel.recv(65535).decode('utf-8')
+            else:
+                break
+        self.readData(output)
+>>>>>>> b0052d7d59cb7ebcfc60f4a6556f899dc15c8d0c
 
     def selectRow(self):
         self.findChild(QTableWidget, 'lanSockets').selectRow()
 
-    def readData(self, data):
+    def createConfig(self, data):
+        with open('./src/example.txt', "w") as file:
+            file.write(data)
+            return file
+
+    def readData(self, data_1):
         ports.clear()
         lanSockets.clear()
         socketId = 0
-        file = open('./text_test.txt', 'r')
-        data = file.readlines()
+        file = self.createConfig(data_1)
+        data = open('./src/example.txt', 'r').readlines()
+        file.close()
         for line in data:
             if line.startswith('port'):
                 if len(line.split()) > 5:
@@ -249,6 +280,8 @@ class MainWindow(QMainWindow):
                 soc.setStatus(port[1], './src/socket_trunk.svg')
             elif port[1] == 'connected' and port[2] != 'trunk':
                 soc.setStatus(port[1], './src/socket_used.svg')
+            elif port[1] == 'disabled':
+                soc.setStatus(port[1], './src/socket_disabled.svg')
             soc.setSpeed(port[4])
             soc.setDuplex(port[3])
             soc.setType(port[5])
@@ -279,48 +312,53 @@ class MainWindow(QMainWindow):
 
             socketId += 1
             prevComm = currComm
+            self.findChild(QGroupBox, 'groupBox').update()
+
 
     def enter(self):
-        if self.win.login.text() == '' or self.win.passwd.text() == '' or self.win.port.text() == '':
-            QMessageBox.warning(self, 'Ошибка при попытке подключения',
-                                'Неудачная попытка подключения: не все поля заполнены!')  # ошибка входа
-        else:
-            self.win.connStatus.setStyleSheet('color:green;text-align:center;')
-            self.win.connStatus.setText('Подключение...')
-            read_thread = threading.Thread(target=self.connect)
-            read_thread.start()
-            self.win.ok.setDisabled(True)
-            self.win.login.setDisabled(True)
-            self.win.passwd.setDisabled(True)
-            self.win.port.setDisabled(True)
-            self.win.ip.setDisabled(True)
-            self.win.setCursor(Qt.CursorShape.WaitCursor)
+        # if self.win.login.text() == '' or self.win.passwd.text() == '' or self.win.port.text() == '':
+        #     QMessageBox.warning(self, 'Ошибка при попытке подключения',
+        #                         'Неудачная попытка подключения: не все поля заполнены!')  # ошибка входа
+        # else:
+        self.win.connStatus.setStyleSheet('color:green;text-align:center;')
+        self.win.connStatus.setText('Подключение...')
+        read_thread = threading.Thread(target=self.connect)
+        read_thread.start()
+        self.win.ok.setDisabled(True)
+        self.win.login.setDisabled(True)
+        self.win.passwd.setDisabled(True)
+        self.win.port.setDisabled(True)
+        self.win.ip.setDisabled(True)
+        self.win.setCursor(Qt.CursorShape.WaitCursor)
 
     def connect(self):
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        self.ssh = paramiko.SSHClient()
+        self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
             # ssh.connect(self.win.ip.text(), username=self.win.login.text(), password=self.win.passwd.text())
-            ssh.connect('10.16.7.74', username='obi', password='ndszi3917')
-            channel = ssh.invoke_shell()
-            time.sleep(1)
-            channel.send('enable\n')
-            time.sleep(1)
-            output = channel.recv(65535)
-            channel.send('screen-length 0 temporary\n')
-            print(output.decode('utf-8'))
-            channel.send('show running-config\n')
-            for kaka in range(10):
-                time.sleep(1)
-                channel.send(' ')
+            self.ssh.connect('10.16.7.79', username='obi', password='ndszi3917')
+            self.channel = self.ssh.invoke_shell()
+            if self.channel.active:
+                self.win.connStatus.setStyleSheet('color:green;text-align:center;')
+                self.win.connStatus.setText('Успешно подключено.')
+                self.win.close()
+                self.subW.close()
+                self.win.connStatus.clear()
+            time.sleep(0.5)
+            self.channel.send('enable\n')
+            time.sleep(0.5)
+            output = self.channel.recv(65535)
+            self.channel.send('show interface status\n')
+            for kaka in range(4):
+                time.sleep(0.1)
+                self.channel.send(' ')
             while True:
-                if channel.recv_ready():
-                    output = channel.recv(65535).decode('utf-8')
-                    print(output)
+                if self.channel.recv_ready():
+                    output = self.channel.recv(65535).decode('utf-8')
                 else:
                     break
-            output = channel.recv(65535)
-            print(output.decode('utf-8'))
+            #self.readData(output)
+            self.xyi.emit(output)
 
         except TimeoutError:
             self.win.connStatus.setStyleSheet('color:red;text-align:center;font-size:10px;')
@@ -362,8 +400,8 @@ class MainWindow(QMainWindow):
             self.win.ip.setDisabled(False)
             self.win.setCursor(Qt.CursorShape.ArrowCursor)
 
-        finally:
-            ssh.close()
+
+
 
     def onclick(self):
         self.win = AnotherWindow()
@@ -405,13 +443,113 @@ class MainWindow(QMainWindow):
                 soc.setStyleSheet('border:none; :hover {border:3px solid #4DB0A8;border-radius:5px;};')
             else:
                 soc.setStyleSheet('border:3px solid #4DB0A8;border-radius:5px;padding:0;margin:0;')
+        self.editingPort = ports[row]
+
+    def enableDisable(self):
+        print(self.editingPort[1])
+        if self.editingPort[1] == 'disabled':
+            self.channel.send('configure terminal\n')
+            time.sleep(0.001)
+            self.channel.send(f'interface {self.editingPort[0]}\n')
+            time.sleep(0.001)
+            self.channel.send('no shutdown\n')
+            time.sleep(0.001)
+            self.channel.send('exit\n')
+            time.sleep(0.001)
+            self.channel.send('exit\n')
+            time.sleep(0.001)
+            self.channel.send('write\n')
+        else:
+            self.channel.send('configure terminal\n')
+            time.sleep(0.001)
+            self.channel.send(f'interface {self.editingPort[0]}\n')
+            time.sleep(0.001)
+            self.channel.send('shutdown\n')
+            time.sleep(0.001)
+            self.channel.send('exit\n')
+            time.sleep(0.001)
+            self.channel.send('exit\n')
+            time.sleep(0.001)
+            self.channel.send('write\n')
+
+        self.check()
+
+    def setTrunk(self):
+        self.channel.send('configure terminal\n')
+        time.sleep(0.001)
+        output = self.channel.recv(65535)
+        print(output.decode('utf-8'))
+        self.channel.send(f'interface {self.editingPort[0]}\n')
+        time.sleep(0.001)
+        self.channel.send(f'switchport mode trunk\n')
+        output = self.channel.recv(65535).decode('utf-8')
+        print(output)
+        time.sleep(0.001)
+        self.channel.send('exit\n')
+        time.sleep(0.001)
+        self.channel.send('exit\n')
+        time.sleep(0.001)
+        self.channel.send('write\n')
+
+        self.check()
+
+    def setAccess(self):
+        self.channel.send('configure terminal\n')
+        time.sleep(0.001)
+        output = self.channel.recv(65535)
+        print(output.decode('utf-8'))
+        self.channel.send(f'interface {self.editingPort[0]}\n')
+        time.sleep(0.001)
+        self.channel.send(f'switchport mode access\n')
+        output = self.channel.recv(65535).decode('utf-8')
+        print(output)
+        time.sleep(0.001)
+        self.channel.send('exit\n')
+        time.sleep(0.001)
+        self.channel.send('exit\n')
+        time.sleep(0.001)
+        self.channel.send('write\n')
+
+        self.check()
+
+    def editVlan(self):
+        self.channel.send('configure terminal\n')
+        time.sleep(0.001)
+        output = self.channel.recv(65535)
+        print(output.decode('utf-8'))
+        self.channel.send(f'interface {self.editingPort[0]}\n')
+        time.sleep(0.001)
+        self.channel.send(f'switchport access vlan {self.vlan}\n')
+        output = self.channel.recv(65535).decode('utf-8')
+        print(output)
+        time.sleep(0.001)
+        self.channel.send('exit\n')
+        time.sleep(0.001)
+        self.channel.send('exit\n')
+        time.sleep(0.001)
+        self.channel.send('write\n')
+
+        self.check()
+
+    # Здесь используй self.vlan
+    def setEditedVlan(self, vlan):
+        self.vlan = vlan
+        print(self.vlan)
+
+    def editVlanShow(self):
+        self.editVlanWin = AnotherWindow()
+        uic.loadUi('./changeVlanForm.ui', self.editVlanWin)
+        self.editVlanWin.apply.clicked.connect(self.editVlan)
+        self.editVlanWin.vlan.textEdited.connect(self.setEditedVlan)
+        self.editVlanWin.apply.clicked.connect(self.editVlanWin.close)
+        self.editVlanWin.show()
 
     # Контекстное
     def showMenu(self):
         speedMenu = QMenu()
         speedMenu.addAction('auto')
-        speedMenu.addAction('a-100')
-        speedMenu.addAction('a-1000')
+        speedMenu.addAction('100')
+        speedMenu.addAction('1000')
         speedMenu.setStyleSheet('QMenu {border:none;background-color:#586578;}'
                                 'QMenu::item:selected {background-color:#4DB0A8;border:3px solid #4DB0A8;}'
                                 'QMenu::item {color:white;border:3px solid #586578;padding:5px 10px;border-radius:5px;}')
@@ -419,21 +557,28 @@ class MainWindow(QMainWindow):
         menu.setStyleSheet('QMenu {border:1px solid #4DB0A8;background-color:#586578;}'
                            'QMenu::item:selected {background-color:#4DB0A8;border:3px solid #4DB0A8;}'
                            'QMenu::item {color:white;border:3px solid #586578;padding:5px 10px;border-radius:5px;}')
+        onOff = QAction(QIcon(QPixmap('./src/onoff.png')), 'Вкл/Выкл')
+        onOff.triggered.connect(self.enableDisable)
         editVlan = QAction(QIcon(QPixmap('./src/changeVlan.png')), 'Изменить VLAN')
+        editVlan.triggered.connect(self.editVlanShow)
         showVlan = QAction(QIcon(QPixmap('./src/show.png')), 'Показать все VLAN')
         editSpeed = QAction(QIcon(QPixmap('./src/changeSpeed.png')), 'Изменить режим скорости')
         editSpeed.setMenu(speedMenu)
         setTrunk = QAction(QIcon(QPixmap('./src/changeMode.png')), 'Изменить на trunk')
+        setTrunk.triggered.connect(self.setTrunk)
         setAccess = QAction(QIcon(QPixmap('./src/changeMode.png')), 'Изменить на access')
+        setAccess.triggered.connect(self.setAccess)
 
         if self.findChild(QTableWidget, 'lanSockets').item(
                 self.findChild(QTableWidget, 'lanSockets').currentRow(), 3).text() != 'trunk':
             menu.clear()
+            menu.addAction(onOff)
             menu.addAction(editVlan)
             menu.addAction(editSpeed)
             menu.addAction(setTrunk)
         else:
             menu.clear()
+            menu.addAction(onOff)
             menu.addAction(editVlan)
             menu.addAction(showVlan)
             menu.addAction(editSpeed)
@@ -447,16 +592,12 @@ window = MainWindow()
 window.setWindowIcon(QIcon('./src/appIcon.png'))
 window.setWindowTitle('Communicator')
 window.setMinimumSize(1200, 900)
-
-window.readData('')
-
 # ==================================Коннекты===================================
 
 window.findChild(QPushButton, 'exit').clicked.connect(window.close)
 window.findChild(QPushButton, 'changeDevice').clicked.connect(window.clearContent)
 window.findChild(QPushButton, 'refresh').clicked.connect(window.check)
 window.findChild(QTableWidget, 'lanSockets').itemClicked.connect(window.selectSocket)
-
+window.xyi.connect(window.readData)
 window.show()
-
 app.exec_()
