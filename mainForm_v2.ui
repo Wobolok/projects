@@ -130,6 +130,16 @@ QTableView QScrollArea {
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="vlanDB">
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="text">
+        <string>База данных VLAN</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="verticalSpacer">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
