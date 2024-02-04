@@ -1,0 +1,20 @@
+ configure terminal
+Enter configuration commands, one per line.  End with CNTL/Z.
+14k-220-stack-79(config)#vlan database
+14k-220-stack-79(config-vlan)#no vlan 3
+14k-220-stack-79(config-vlan)#exit
+14k-220-stack-79(config)#exit
+14k-220-stack-79#write
+Building configuration...
+[OK]
+14k-220-stack-79#show running-config interface port4.0.1
+!
+interface port4.0.1
+ switchport
+ switchport mode trunk
+ switchport trunk allowed vlan add 2,20,64,79,2001
+ storm-control broadcast level 5
+ storm-control multicast level 5
+ lldp tlv-select system-name
+!
+14k-220-stack-79#

@@ -204,6 +204,8 @@ class MainWindow(QMainWindow):
                 g.close()
 
             output = self.channel.recv(65535)
+            self.channel.send('show running-config switch vlan\n')
+            time.sleep(0.1)
             self.channel.send('show interface status\n')
             for kaka in range(4):
                 time.sleep(0.1)
@@ -214,9 +216,10 @@ class MainWindow(QMainWindow):
                 else:
                     break
             self.readData(output)
-            self.fillDB('output1')
+            self.fillDB(output)
 
         except:
+
             data = open('./src/example.txt', 'r')
             output = data.readlines()
             self.readData(output)
@@ -224,12 +227,12 @@ class MainWindow(QMainWindow):
             output1 = data1.readlines()
             self.fillDB(output1)
 
-    def fillDB(self, data):
+    def fillDB(self, data_1):
         self.availableVlans.clear()
 
-        # file = self.createConfig(data_1)
-        # data = open('./src/example.txt', 'r').readlines()
-        # file.close()
+        file = self.createConfig(data_1)
+        data = open('./src/example.txt', 'r').readlines()
+        file.close()
 
         for item in data:
             if item.startswith(' vlan'):
@@ -271,16 +274,21 @@ class MainWindow(QMainWindow):
             file.write(data)
             return file
 
+    def createConfig1(self, data):
+        with open('./src/example1.txt', "w") as file:
+            file.write(data)
+            return file
+
     def readData(self, data_1):
         ports.clear()
         lanSockets.clear()
         socketId = 0
         # =====================================Раскомментить=========================================
-        # file = self.createConfig(data_1)
-        # data = open('./src/example.txt', 'r').readlines()
-        # file.close()
+        file = self.createConfig(data_1)
+        data = open('./src/example.txt', 'r').readlines()
+        file.close()
         # ==========================Убрать строчку под этим комментом================================
-        data = open('./text_test.txt', 'r').readlines()
+        # data = open('./text_test.txt', 'r').readlines()
 
         for line in data:
             if line.startswith('port'):
@@ -398,6 +406,8 @@ class MainWindow(QMainWindow):
             self.channel.send('enable\n')
             time.sleep(0.5)
             output = self.channel.recv(65535)
+            self.channel.send('show running-config switch vlan\n')
+            time.sleep(0.1)
             self.channel.send('show interface status\n')
             for kaka in range(4):
                 time.sleep(0.1)
@@ -407,11 +417,8 @@ class MainWindow(QMainWindow):
                     output = self.channel.recv(65535).decode('utf-8')
                 else:
                     break
-            #self.readData(output)
             self.fillPreview.emit(output)
-
-            # ========================Добавить команду считывания БД вланов ==================================
-            self.fillDatabase.emit('output')
+            self.fillDatabase.emit(output)
 
         except TimeoutError:
             self.win.connStatus.setStyleSheet('color:red;text-align:center;font-size:10px;')
@@ -595,13 +602,14 @@ class MainWindow(QMainWindow):
 
     def showVlans(self):
         # Запрос в результате которого output
+        self.channel.send(f'show running-config interface {self.editingPort[0]}\n')
+        time.sleep(0.1)
+        output = self.channel.recv(65535).decode('utf-8')
+        print(output)
+        file = self.createConfig(output)
+        data = open('./src/example.txt', 'r').readlines()
+        file.close()
 
-        # file = self.createConfig(output)
-        # data = open('./src/example.txt', 'r').readlines()
-        # file.close()
-
-        # Поменять ./vlan_test1.txt на ./src/example.txt
-        data = open('./vlan_test1.txt', 'r').readlines()
 
         vlans = []
 
@@ -620,6 +628,22 @@ class MainWindow(QMainWindow):
         self.showVlansWin.database.removeColumn(1)
 
         def add():
+            self.channel.send('configure terminal\n')
+            time.sleep(0.001)
+            output = self.channel.recv(65535)
+            print(output.decode('utf-8'))
+            self.channel.send(f'interface {self.editingPort[0]}\n')
+            time.sleep(0.001)
+            self.channel.send(f'switchport trunk allowed vlan add {self.addVlanToTrunkWin.vlans.currentText()}\n')
+            output = self.channel.recv(65535).decode('utf-8')
+            print(output)
+            time.sleep(0.001)
+            self.channel.send('exit\n')
+            time.sleep(0.001)
+            self.channel.send('exit\n')
+            time.sleep(0.001)
+            self.channel.send('write\n')
+
             newVlan = QTableWidgetItem()
             newVlan.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             newVlan.setText(self.addVlanToTrunkWin.vlans.currentText())
@@ -641,6 +665,23 @@ class MainWindow(QMainWindow):
 
         def removeVlan():
             selectedVlan = table.currentItem().text()
+
+            self.channel.send('configure terminal\n')
+            time.sleep(0.001)
+            output = self.channel.recv(65535)
+            print(output.decode('utf-8'))
+            self.channel.send(f'interface {self.editingPort[0]}\n')
+            time.sleep(0.001)
+            self.channel.send(f'switchport trunk allowed vlan remove {selectedVlan}\n')
+            output = self.channel.recv(65535).decode('utf-8')
+            print(output)
+            time.sleep(0.001)
+            self.channel.send('exit\n')
+            time.sleep(0.001)
+            self.channel.send('exit\n')
+            time.sleep(0.001)
+            self.channel.send('write\n')
+
             table.removeRow(table.currentRow())
 
         # Коннекты
@@ -710,6 +751,17 @@ class MainWindow(QMainWindow):
                 warn = QMessageBox.warning(self.addVlanWin, 'Ошибка при попытке добавления VLAN',
                                            'Пожалуйста, заполните все поля!')
             else:
+                self.channel.send('configure terminal\n')
+                time.sleep(0.001)
+                self.channel.send('vlan database\n')
+                time.sleep(0.001)
+                self.channel.send(f'vlan {self.addVlanWin.vlan.text()} name {self.addVlanWin.name.text()}\n')
+                time.sleep(0.001)
+                self.channel.send('exit\n')
+                time.sleep(0.001)
+                self.channel.send('exit\n')
+                time.sleep(0.001)
+                self.channel.send('write\n')
                 table = self.dbWin.database
                 table.setRowCount(table.rowCount() + 1)
 
@@ -733,6 +785,17 @@ class MainWindow(QMainWindow):
     def removeVlanFromDatabase(self):
         table = self.dbWin.database
         vlan = table.selectedItems()[0].text()
+        self.channel.send('configure terminal\n')
+        time.sleep(0.001)
+        self.channel.send('vlan database\n')
+        time.sleep(0.001)
+        self.channel.send(f'no vlan {vlan}\n')
+        time.sleep(0.001)
+        self.channel.send('exit\n')
+        time.sleep(0.001)
+        self.channel.send('exit\n')
+        time.sleep(0.001)
+        self.channel.send('write\n')
         table.removeRow(table.currentRow())
         self.availableVlans.remove(self.availableVlans[table.currentRow() + 1])
 
@@ -754,6 +817,6 @@ window.findChild(QPushButton, 'refresh').clicked.connect(window.refresh)
 window.findChild(QTableWidget, 'lanSockets').itemClicked.connect(window.selectSocket)
 window.findChild(QPushButton, 'vlanDB').clicked.connect(window.showDatabase)
 window.fillPreview.connect(window.readData)
-
+window.fillDatabase.connect(window.fillDB)
 window.show()
 app.exec_()
