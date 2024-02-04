@@ -72,7 +72,7 @@ QRadioButton::indicator::checked {
      <item>
       <widget class="QLineEdit" name="login">
        <property name="placeholderText">
-        <string>Логин/почта</string>
+        <string>Логин</string>
        </property>
        <property name="clearButtonEnabled">
         <bool>true</bool>
