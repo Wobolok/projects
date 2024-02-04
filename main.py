@@ -377,27 +377,27 @@ class MainWindow(QMainWindow):
 
 
     def enter(self):
-        # if self.win.login.text() == '' or self.win.passwd.text() == '' or self.win.port.text() == '':
-        #     QMessageBox.warning(self, 'Ошибка при попытке подключения',
-        #                         'Неудачная попытка подключения: не все поля заполнены!')  # ошибка входа
-        # else:
-        self.win.connStatus.setStyleSheet('color:green;text-align:center;')
-        self.win.connStatus.setText('Подключение...')
-        read_thread = threading.Thread(target=self.connect)
-        read_thread.start()
-        self.win.ok.setDisabled(True)
-        self.win.login.setDisabled(True)
-        self.win.passwd.setDisabled(True)
-        self.win.port.setDisabled(True)
-        self.win.ip.setDisabled(True)
-        self.win.setCursor(Qt.CursorShape.WaitCursor)
+        if self.win.login.text() == '' or self.win.passwd.text() == '' or self.win.port.text() == '':
+            QMessageBox.warning(self, 'Ошибка при попытке подключения',
+                                'Неудачная попытка подключения: не все поля заполнены!')  # ошибка входа
+        else:
+            self.win.connStatus.setStyleSheet('color:green;text-align:center;')
+            self.win.connStatus.setText('Подключение...')
+            read_thread = threading.Thread(target=self.connect)
+            read_thread.start()
+            self.win.ok.setDisabled(True)
+            self.win.login.setDisabled(True)
+            self.win.passwd.setDisabled(True)
+            self.win.port.setDisabled(True)
+            self.win.ip.setDisabled(True)
+            self.win.setCursor(Qt.CursorShape.WaitCursor)
 
     def connect(self):
         self.ssh = paramiko.SSHClient()
         self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
-            # ssh.connect(self.win.ip.text(), username=self.win.login.text(), password=self.win.passwd.text())
-            self.ssh.connect('10.16.7.79', username='obi', password='ndszi3917')
+            self.ssh.connect(self.win.ip.text(), username=self.win.login.text(), password=self.win.passwd.text())
+            # self.ssh.connect('10.16.7.79', username='obi', password='ndszi3917')
             self.channel = self.ssh.invoke_shell()
             if self.channel.active:
                 self.win.connStatus.setStyleSheet('color:green;text-align:center;')
