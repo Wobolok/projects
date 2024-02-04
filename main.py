@@ -613,14 +613,19 @@ class MainWindow(QMainWindow):
         data = open('./src/example.txt', 'r').readlines()
         file.close()
 
-
         vlans = []
+        result_vlans = []
 
-        for item in data:
-            if item.startswith(' switchport trunk'):
-                item = item.split()
-                item = item[len(item) - 1].split(',')
-                vlans = item
+        for line in data:
+            if line.startswith(' switchport trunk'):
+                vlans = line.split()[len(line.split()) - 1].split(',')
+
+        for element in vlans:
+            if '-' in element:
+                start, end = element.split('-')
+                result_vlans.extend(list(map(str, range(int(start), int(end) + 1))))
+            else:
+                result_vlans.append(str(element))
 
         self.showVlansWin = AnotherWindow()
         uic.loadUi('./vlanDBForm.ui', self.showVlansWin)
@@ -631,29 +636,34 @@ class MainWindow(QMainWindow):
         self.showVlansWin.database.removeColumn(1)
 
         def add():
-            self.channel.send('configure terminal\n')
-            time.sleep(0.001)
-            output = self.channel.recv(65535)
-            print(output.decode('utf-8'))
-            self.channel.send(f'interface {self.editingPort[0]}\n')
-            time.sleep(0.001)
-            self.channel.send(f'switchport trunk allowed vlan add {self.addVlanToTrunkWin.vlans.currentText()}\n')
-            output = self.channel.recv(65535).decode('utf-8')
-            print(output)
-            time.sleep(0.001)
-            self.channel.send('exit\n')
-            time.sleep(0.001)
-            self.channel.send('exit\n')
-            time.sleep(0.001)
-            self.channel.send('write\n')
+            if self.addVlanToTrunkWin.vlans.currentText() in result_vlans:
+                warn = QMessageBox.warning(self.addVlanToTrunkWin, 'Ошибка при попытке добавления VLAN',
+                                           'Данный VLAN уже добавлен на выбранный порт!')
 
-            newVlan = QTableWidgetItem()
-            newVlan.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            newVlan.setText(self.addVlanToTrunkWin.vlans.currentText())
+            else:
+                self.channel.send('configure terminal\n')
+                time.sleep(0.001)
+                output = self.channel.recv(65535)
+                print(output.decode('utf-8'))
+                self.channel.send(f'interface {self.editingPort[0]}\n')
+                time.sleep(0.001)
+                self.channel.send(f'switchport trunk allowed vlan add {self.addVlanToTrunkWin.vlans.currentText()}\n')
+                output = self.channel.recv(65535).decode('utf-8')
+                print(output)
+                time.sleep(0.001)
+                self.channel.send('exit\n')
+                time.sleep(0.001)
+                self.channel.send('exit\n')
+                time.sleep(0.001)
+                self.channel.send('write\n')
 
-            table.setRowCount(table.rowCount() + 1)
-            table.setItem(table.rowCount() - 1, 0, newVlan)
-            self.addVlanToTrunkWin.close()
+                newVlan = QTableWidgetItem()
+                newVlan.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                newVlan.setText(self.addVlanToTrunkWin.vlans.currentText())
+
+                table.setRowCount(table.rowCount() + 1)
+                table.setItem(table.rowCount() - 1, 0, newVlan)
+                self.addVlanToTrunkWin.close()
 
         def addVlan():
             self.addVlanToTrunkWin = AnotherWindow()
@@ -694,8 +704,8 @@ class MainWindow(QMainWindow):
         # Заполнение таблицы
         table = self.showVlansWin.database
         table.setSizeAdjustPolicy(QAbstractItemView.AdjustToContents)
-        table.setRowCount(len(vlans))
-        for vlan in vlans:
+        table.setRowCount(len(result_vlans))
+        for vlan in result_vlans:
             num = QTableWidgetItem()
             num.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             num.setText(vlan)
