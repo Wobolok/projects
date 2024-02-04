@@ -705,8 +705,21 @@ class MainWindow(QMainWindow):
         self.showVlansWin.show()
 
     def setUnlocked(self):
-        # =========================Добавить команду==================================
-        pass
+        self.channel.send('configure terminal\n')
+        time.sleep(0.001)
+        output = self.channel.recv(65535)
+        print(output.decode('utf-8'))
+        self.channel.send(f'interface {self.editingPort[0]}\n')
+        time.sleep(0.001)
+        self.channel.send(f'no switchport port-security\n')
+        output = self.channel.recv(65535).decode('utf-8')
+        print(output)
+        time.sleep(0.001)
+        self.channel.send('exit\n')
+        time.sleep(0.001)
+        self.channel.send('exit\n')
+        time.sleep(0.001)
+        self.channel.send('write\n')
 
     # Контекстное
     def showMenu(self):
@@ -822,13 +835,17 @@ class MainWindow(QMainWindow):
             self.loadingWin = AnotherWindow()
             uic.loadUi('./loadingForm.ui', self.loadingWin)
             self.loadingWin.setWindowFlags(Qt.FramelessWindowHint)
+            self.channel.send('reboot\n')
+            time.sleep(0.001)
+            self.channel.send('Y\n')
 
-            # =========================Добавить команду==================================
-
+            timer = QTimer(self)
+            timer.timeout.connect(self.loadingWin.close, 120000)
+            timer.timeout.connect(self.clearContent, 120000)
             self.loadingWin.show()
+            timer.start(120000)
         elif answer == QMessageBox.No:
             pass
-
 app = QApplication(sys.argv)
 
 window = MainWindow()
