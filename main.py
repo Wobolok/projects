@@ -663,6 +663,7 @@ class MainWindow(QMainWindow):
 
                 table.setRowCount(table.rowCount() + 1)
                 table.setItem(table.rowCount() - 1, 0, newVlan)
+                result_vlans.append(newVlan.text())
                 self.addVlanToTrunkWin.close()
 
         def addVlan():
@@ -695,6 +696,7 @@ class MainWindow(QMainWindow):
             time.sleep(0.001)
             self.channel.send('write\n')
 
+            result_vlans.remove(selectedVlan)
             table.removeRow(table.currentRow())
 
         # Коннекты
