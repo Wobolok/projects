@@ -170,6 +170,9 @@ class MainWindow(QMainWindow):
 
         w = QWidget()
         uic.loadUi('./mainForm_v2.ui', w)
+        w.reboot.setIcon(QIcon('./src/reboot.png'))
+        w.exit.setIcon(QIcon('./src/exit.png'))
+        w.vlanDB.setIcon(QIcon('./src/db.png'))
         self.setCentralWidget(w)
 
         self.subW = QWidget()
@@ -701,6 +704,10 @@ class MainWindow(QMainWindow):
 
         self.showVlansWin.show()
 
+    def setUnlocked(self):
+        # =========================Добавить команду==================================
+        pass
+
     # Контекстное
     def showMenu(self):
         speedMenu = QMenu()
@@ -726,6 +733,8 @@ class MainWindow(QMainWindow):
         setTrunk.triggered.connect(self.setTrunk)
         setAccess = QAction(QIcon(QPixmap('./src/changeMode.png')), 'Изменить на access')
         setAccess.triggered.connect(self.setAccess)
+        unlock = QAction(QIcon(QPixmap('./src/unlock.png')), 'Снять защиту')
+        unlock.triggered.connect(self.setUnlocked)
 
         if self.findChild(QTableWidget, 'lanSockets').item(
                 self.findChild(QTableWidget, 'lanSockets').currentRow(), 3).text() != 'trunk':
@@ -734,12 +743,14 @@ class MainWindow(QMainWindow):
             menu.addAction(editVlan)
             menu.addAction(editSpeed)
             menu.addAction(setTrunk)
+            menu.addAction(unlock)
         else:
             menu.clear()
             menu.addAction(onOff)
             menu.addAction(showVlan)
             menu.addAction(editSpeed)
             menu.addAction(setAccess)
+            menu.addAction(unlock)
         menu.exec_(QCursor.pos())
 
     def addVlanToDatabase(self):
@@ -802,6 +813,21 @@ class MainWindow(QMainWindow):
     def showDatabase(self):
         self.dbWin.show()
 
+    def reboot(self):
+        answer = QMessageBox.question(self.centralWidget(), "Перезапуск устройства",
+                                      "Вы действительно желаете перезапустить устройство?",
+                                      QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+        if answer == QMessageBox.Yes:
+            self.loadingWin = AnotherWindow()
+            uic.loadUi('./loadingForm.ui', self.loadingWin)
+            self.loadingWin.setWindowFlags(Qt.FramelessWindowHint)
+
+            # =========================Добавить команду==================================
+
+            self.loadingWin.show()
+        elif answer == QMessageBox.No:
+            pass
 
 app = QApplication(sys.argv)
 
@@ -816,6 +842,7 @@ window.findChild(QPushButton, 'changeDevice').clicked.connect(window.clearConten
 window.findChild(QPushButton, 'refresh').clicked.connect(window.refresh)
 window.findChild(QTableWidget, 'lanSockets').itemClicked.connect(window.selectSocket)
 window.findChild(QPushButton, 'vlanDB').clicked.connect(window.showDatabase)
+window.findChild(QPushButton, 'reboot').clicked.connect(window.reboot)
 window.fillPreview.connect(window.readData)
 window.fillDatabase.connect(window.fillDB)
 window.show()
