@@ -214,6 +214,7 @@ class MainWindow(QMainWindow):
                 else:
                     break
             self.readData(output)
+            self.fillDB('output1')
 
         except:
             data = open('./src/example.txt', 'r')
@@ -225,6 +226,10 @@ class MainWindow(QMainWindow):
 
     def fillDB(self, data):
         self.availableVlans.clear()
+
+        # file = self.createConfig(data_1)
+        # data = open('./src/example.txt', 'r').readlines()
+        # file.close()
 
         for item in data:
             if item.startswith(' vlan'):
@@ -448,9 +453,6 @@ class MainWindow(QMainWindow):
             self.win.ip.setDisabled(False)
             self.win.setCursor(Qt.CursorShape.ArrowCursor)
 
-
-
-
     def onclick(self):
         self.win = AnotherWindow()
         uic.loadUi('./loginForm.ui', self.win)
@@ -592,6 +594,13 @@ class MainWindow(QMainWindow):
         self.editVlanWin.show()
 
     def showVlans(self):
+        # Запрос в результате которого output
+
+        # file = self.createConfig(output)
+        # data = open('./src/example.txt', 'r').readlines()
+        # file.close()
+
+        # Поменять ./vlan_test1.txt на ./src/example.txt
         data = open('./vlan_test1.txt', 'r').readlines()
 
         vlans = []
@@ -649,7 +658,6 @@ class MainWindow(QMainWindow):
 
             table.setItem(vlans.index(vlan), 0, num)
 
-
         self.showVlansWin.show()
 
     # Контекстное
@@ -688,7 +696,6 @@ class MainWindow(QMainWindow):
         else:
             menu.clear()
             menu.addAction(onOff)
-            menu.addAction(editVlan)
             menu.addAction(showVlan)
             menu.addAction(editSpeed)
             menu.addAction(setAccess)
