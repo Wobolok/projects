@@ -1,0 +1,9 @@
+!
+interface port4.0.1
+ switchport
+ switchport mode trunk
+ switchport trunk allowed vlan add 2,20,64,79,2001
+ storm-control broadcast level 5
+ storm-control multicast level 5
+ lldp tlv-select system-name
+!

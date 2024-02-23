@@ -1,0 +1,9 @@
+!
+vlan database
+ vlan 2 name SED
+ vlan 20 name GUBP
+ vlan 64 name UROG
+ vlan 79 name GVMU
+ vlan 2001 name Managment
+ vlan 2,20,64,79,2001 state enable
+!

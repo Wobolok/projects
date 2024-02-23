@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>202</width>
+    <height>127</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Добавление VLAN</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget {
+	background-color:#333e50;
+	color:white;
+	font-family:arial;
+	font-weight:bold;
+	font-size:15px;
+}
+
+QGroupBox {
+    border: 1px solid gray;
+    border-color: #4DB0A8;
+    margin-top: 27px;
+    font-size: 14px;
+    border-radius: 10px;
+	background-color:#333e50;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top center;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    padding: 5px 10px;
+    background-color: #4DB0A8;
+    color: rgb(255, 255, 255);
+}
+
+QComboBox {
+	selection-background-color: #333e50;
+}
+
+QComboBox QAbstractItemView {
+    selection-background-color: #4DB0A8;
+	selection-border:1px solid #333e50;
+	border:1px solid #4DB0A8;
+}
+
+QPushButton {
+	color:black;
+	background-color:#4DB0A8;
+	border:none;
+	border-radius:15px;
+	padding:8px 10px;
+	font-family:arial;
+	font-weight:bold;
+	font-size:15px;
+}
+
+QPushButton:hover {
+	color:white;
+	cursor:PointingHand;
+}
+
+QLineEdit {
+	color:#747C86;
+	font-weight:bold;
+	background-color:#2F3A4A;
+	padding:5px 5px;
+	max-width:200px;
+	min-width:150px;
+	border-radius:10px;
+	border:none;
+}</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Доступные VLAN</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QComboBox" name="vlans">
+        <property name="frame">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="add">
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="text">
+        <string>Добавить</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
